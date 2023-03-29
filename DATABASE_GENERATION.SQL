@@ -1,0 +1,63 @@
+/* Generate database, user and tables for lucentLIMS
+This script needs to be run as root.
+Warning! This script is designed for the initial creation.
+It will overwrite all existing databases with the name "lucent". */
+
+/* Drop any old lucent database before creating a new one.
+WARNING: This script is for (re)installation of a lucent instance.
+All data will be lost with or without dropping the old datbase first! */
+DROP DATABASE `lucent`;
+
+
+
+/* Initial database generation. */
+-- COLLATE is what the Arch Wiki suggests for Databases on Linux systems.
+CREATE OR REPLACE DATABASE `lucent` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+/* Inital user generation. */
+-- TODO: Check wether this is safe to do. Usually the socket is read-writable for everyone.
+CREATE OR REPLACE USER 'grindel'@'localhost' IDENTIFIED VIA 'unix_socket';
+-- Only neccessary if SQL_MODE does not have NO_AUTO_CREATE_USER set.
+-- The table "lucent" can be used by the user of the same name.
+GRANT USAGE ON `lucent`.* TO 'grindel'@'localhost' IDENTIFIED VIA 'unix_socket';
+-- Allow all actions on this databnase to user "lucent".
+GRANT ALL PRIVILEGES ON `lucent`.* TO 'grindel'@'localhost';
+-- Update the RDBMS to the recent access permissions.
+FLUSH PRIVILEGES;
+
+/* Databases */
+USE `lucent`;  -- Only database to be used.
+
+
+
+-- Spatial Information: Cities, sampling sites, addresses.
+SOURCE SPATIAL.SQL;
+
+-- Clients, employees, manufacturers, …
+SOURCE PEOPLE_AND_ORGANIZATIONS.SQL;
+
+-- Sample types, matrizes, etc..
+SOURCE CLASSES.SQL
+
+-- Miscellaneous information.
+SOURCE MISCELLANEOUS.SQL;
+
+-- Scientific information like units and constants.
+SOURCE SCIENTIFIC.SQL
+
+-- Information about measurement instruments, flasks, and so on.
+-- Everything one needs to complete a specific action.
+SOURCE DEVICES.SQL
+
+-- Getting to the jist of it now. One of two hearts of lucent. The actions.
+SOURCE PROCEDURES_AND_ACTIONS.SQL;
+
+-- Second heart of lucent. Collections.
+SOURCE COLLECTIONS.SQL
+
+-- The actual numbers and other infobits produced by
+-- actions and belonging in their respective colletions.
+SOURCE VARIABLES_AND_VALUES.SQL
+
+-- Now that smaller clusters of tables are prepared, they
+-- can be connected in a global fashion.
+SOURCE GLOBAL_CONNECTION.SQL
