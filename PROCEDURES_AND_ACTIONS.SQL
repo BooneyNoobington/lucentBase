@@ -33,7 +33,7 @@ CREATE OR REPLACE TABLE `link`
 is not stored in here.*/
 CREATE OR REPLACE TABLE `sop`
 (
-    `id_sop` INTEGER PRIMARY KEY NOT NULL
+    `id_sop` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT
   , `identifier` VARCHAR(40) UNIQUE NOT NULL
   , `active` BOOLEAN NOT NULL
 );
@@ -67,7 +67,6 @@ CREATE OR REPLACE TABLE `j_sop_person`
 
 /* One of two hearts of lucentLIMS. There are objects of interets (often called "samples")
 and something that happens with them. Actions.*/
-
 CREATE OR REPLACE TABLE `action`
 (
     `id_action` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
@@ -92,12 +91,14 @@ CREATE OR REPLACE TABLE `j_action_action`
     -- TODO: Really neccessary?
   , `identifier` VARCHAR(40)
   -- Which action depends on which other action.
-  , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
+  , `id_dependant` INTEGER NOT NULL REFERENCES `action` (`id_action`)
   , `id_dependency` INTEGER NOT NULL REFERENCES `action` (`id_action`)
   -- Some dependencies are only recommended or completely optional.
   , `dependency_class` VARCHAR(12) NOT NULL CHECK (
         `dependency_class` IN ('mandatory', 'recommended', 'optional')
     )
+  -- Make sure there are no doubled paring of two actions.
+  , CONSTRAINT `id_action_id_action_unique` UNIQUE(`id_dependant`, `id_dependency`)
 );
 
 

@@ -29,6 +29,9 @@ USE `lucent`;  -- Only database to be used.
 
 
 
+-- Miscellaneous information.
+SOURCE MISCELLANEOUS.SQL;
+
 -- Spatial Information: Cities, sampling sites, addresses.
 SOURCE SPATIAL.SQL;
 
@@ -37,9 +40,6 @@ SOURCE PEOPLE_AND_ORGANIZATIONS.SQL;
 
 -- Sample types, matrizes, etc..
 SOURCE CLASSES.SQL
-
--- Miscellaneous information.
-SOURCE MISCELLANEOUS.SQL;
 
 -- Scientific information like units and constants.
 SOURCE SCIENTIFIC.SQL

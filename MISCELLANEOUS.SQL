@@ -11,20 +11,6 @@ CREATE OR REPLACE TABLE `event`
 
 
 
-/* Polymorphic ascocciation with an arbitrary other table. */
-CREATE OR REPLACE TABLE `j_event_t`
-(
-    `id_event_t` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  -- Classic foreign key contraint to a given event.
-  , `id_event` INTEGER NOT NULL REFERENCES `event` (`id_event`)
-  -- Allow for connection to every possible other table.
-  , `id_concerning_table` INTEGER NOT NULL
-  , `concerning_table` VARCHAR(50) NOT NULL
-);
--- TODO: Implement the same kind of trigger as with the value table.
-
-
-
 /* A very basic method to assign a task / to do regarding an arbitray record. */
 -- TODO: Very similar with `event` in function and build up. Merge?
 CREATE OR REPLACE TABLE `task`
@@ -40,19 +26,6 @@ CREATE OR REPLACE TABLE `task`
   , `id_assignee` INTEGER NOT NULL REFERENCES `person` (`id_person`)
   -- When is the task due?
   , `deadline` DATETIME
-);
-
-
-
-/* Polymorphic ascocciation with an arbitrary other table. */
-CREATE OR REPLACE TABLE `j_task_t`
-(
-    `id_task_t` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  -- Classic foreign key contraint to a given event.
-  , `id_task` INTEGER NOT NULL REFERENCES `task` (`id_task`)
-  -- Allow for connection to every possible other table.
-  , `id_concerning_table` INTEGER NOT NULL
-  , `concerning_table` VARCHAR(50) NOT NULL
 );
 
 
