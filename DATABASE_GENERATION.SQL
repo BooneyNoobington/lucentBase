@@ -3,10 +3,12 @@ This script needs to be run as root.
 Warning! This script is designed for the initial creation.
 It will overwrite all existing databases with the name "lucent". */
 
+
+
 /* Drop any old lucent database before creating a new one.
 WARNING: This script is for (re)installation of a lucent instance.
 All data will be lost with or without dropping the old datbase first! */
-DROP DATABASE `lucent`;
+DROP DATABASE IF EXISTS `lucent`;
 
 
 
@@ -15,12 +17,12 @@ DROP DATABASE `lucent`;
 CREATE OR REPLACE DATABASE `lucent` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 /* Inital user generation. */
 -- TODO: Check wether this is safe to do. Usually the socket is read-writable for everyone.
-CREATE OR REPLACE USER 'grindel'@'localhost' IDENTIFIED VIA 'unix_socket';
+CREATE OR REPLACE USER `grindel`@'localhost' IDENTIFIED VIA unix_socket;
 -- Only neccessary if SQL_MODE does not have NO_AUTO_CREATE_USER set.
 -- The table "lucent" can be used by the user of the same name.
-GRANT USAGE ON `lucent`.* TO 'grindel'@'localhost' IDENTIFIED VIA 'unix_socket';
+GRANT USAGE ON `lucent`.* TO `grindel`@'localhost' IDENTIFIED VIA unix_socket;
 -- Allow all actions on this databnase to user "lucent".
-GRANT ALL PRIVILEGES ON `lucent`.* TO 'grindel'@'localhost';
+GRANT ALL PRIVILEGES ON `lucent`.* TO `grindel`@'localhost' IDENTIFIED VIA unix_socket;
 -- Update the RDBMS to the recent access permissions.
 FLUSH PRIVILEGES;
 
@@ -29,14 +31,14 @@ USE `lucent`;  -- Only database to be used.
 
 
 
--- Miscellaneous information.
-SOURCE MISCELLANEOUS.SQL;
-
 -- Spatial Information: Cities, sampling sites, addresses.
 SOURCE SPATIAL.SQL;
 
 -- Clients, employees, manufacturers, …
 SOURCE PEOPLE_AND_ORGANIZATIONS.SQL;
+
+-- Miscellaneous information.
+SOURCE MISCELLANEOUS.SQL;
 
 -- Sample types, matrizes, etc..
 SOURCE CLASSES.SQL
@@ -49,7 +51,7 @@ SOURCE SCIENTIFIC.SQL
 SOURCE DEVICES.SQL
 
 -- Getting to the jist of it now. One of two hearts of lucent. The actions.
-SOURCE PROCEDURES_AND_ACTIONS.SQL;
+SOURCE ACTIONS_AND_LIFECYCLES.SQL;
 
 -- Second heart of lucent. Collections.
 SOURCE COLLECTIONS.SQL

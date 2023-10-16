@@ -80,25 +80,40 @@ CREATE OR REPLACE TABLE `action`
 );
 
 
+/* Often times many actions are needed to be performed to do whatever is desired to
+happen with a collection such as a sample. These are combined in a "lifecycle".
+A lifecycle is selective concerning variables. Not all variables of an action are
+required.
+In lucentLIMS it is mandatory to provide "lifecycles" not just optional. */
+CREATE OR REPLACE TABLE `lifecycle`
+(
+    `id_lifecycle` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+  , `identifier` VARCHAR(50) UNIQUE NOT NULL
+  , `iteration` DATETIME NOT NULL  -- Versioning.
+    -- Name (and version) alone don't have to be unique. But in combination
+    -- they should be.
+  , CONSTRAINT `ident_iter_unique` UNIQUE(`identifier`, `iteration`)
+);
+
 
 /* An action can depend on multiple other actions. This junction table explains
 such a dependency. */
-CREATE OR REPLACE TABLE `j_action_action`
+CREATE OR REPLACE TABLE `j_lifecycle_dependency`
 (
     -- primary key.
     `id_action_action` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- A short, optional description about what this dependency means.
-    -- TODO: Really neccessary?
-  , `identifier` VARCHAR(40)
-  -- Which action depends on which other action.
+    -- Dependencies are vallid for a specific lifecycle. Sometimes actions like "report_completion"
+    -- depend on only one measurement, sometimes dozens.
+  , `id_lifecycle` INTEGER REFERENCES `lifecycle` (`id_lifecycle`)
+    -- Which action depends on which other action.
   , `id_dependant` INTEGER NOT NULL REFERENCES `action` (`id_action`)
   , `id_dependency` INTEGER NOT NULL REFERENCES `action` (`id_action`)
-  -- Some dependencies are only recommended or completely optional.
+    -- Some dependencies are only recommended or completely optional.
   , `dependency_class` VARCHAR(12) NOT NULL CHECK (
         `dependency_class` IN ('mandatory', 'recommended', 'optional')
     )
-  -- Make sure there are no doubled paring of two actions.
-  , CONSTRAINT `id_action_id_action_unique` UNIQUE(`id_dependant`, `id_dependency`)
+    -- Make sure there are no doubled paring of two actions.
+  , CONSTRAINT `id_action_id_action_unique` UNIQUE(`id_dependant`, `id_dependency`, `id_lifecycle`)
 );
 
 
@@ -107,7 +122,7 @@ CREATE OR REPLACE TABLE `j_action_action`
 CREATE OR REPLACE TABLE `j_action_person`
 (
     `id_action_person` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  -- What action is performed by which individual?
+    -- What action is performed by which individual?
   , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
   , `id_person` INTEGER NOT NULL REFERENCES `person` (`id_person`)
     -- What job does this person have regarding the action.
@@ -126,7 +141,7 @@ CREATE OR REPLACE TABLE `j_action_matrix`
     `id_action_matrix` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `id_action` INTEGER NOT NULL REFERENCES `action` (id_action)
   , `id_matrix` INTEGER NOT NULL REFERENCES `matrix` (id_matrix)
-  -- Avoind redundant connections.
+    -- Avoind redundant connections.
   , CONSTRAINT `id_action_id_matrix_unique` UNIQUE(`id_action`, `id_matrix`)
 );
 
@@ -150,21 +165,4 @@ CREATE OR REPLACE TABLE `j_action_device`
     `id_action_device` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
   , `id_device` INTEGER NOT NULL REFERENCES `device` (`id_device`)
-);
-
-
-
-/* Often times many actions are needed to be performed to do whatever is desired to
-happen with a collection such as a sample. These are combined in a procedure.
-A procedure is selective converning variables. Not all variables of an action are
-required.
-In lucentLIMS it is mandatory to provide procedures not just optional. */
-CREATE OR REPLACE TABLE `procedure`
-(
-    `id_procedure` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  , `identifier` VARCHAR(50) UNIQUE NOT NULL
-  , `iteration` DATETIME NOT NULL  -- Versioning.
-    -- Name (and version) alone don't have to be unique. But in combination
-    -- they should be.
-  , CONSTRAINT `ident_iter_unique` UNIQUE(`identifier`, `iteration`)
 );

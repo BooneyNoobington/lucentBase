@@ -56,8 +56,8 @@ CREATE OR REPLACE TABLE `site`
   , `id_district` INTEGER REFERENCES `district` (`id_district`)
   , `id_address` INTEGER REFERENCES `address` (`id_address`)
   , CHECK (
-      (`id_district` IS NOT NULL AND id_address IS NULL)
+      (`id_district` IS NOT NULL AND `id_address` IS NULL)
       OR
-      (id_address IS NOT NULL AND id_district IS NULL)
+      (`id_address` IS NOT NULL AND `id_district` IS NULL)
     )
 );

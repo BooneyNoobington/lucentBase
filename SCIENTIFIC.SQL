@@ -1,3 +1,12 @@
+/* Units of measurements base on dimensions. Like mass, length or time. */
+CREATE OR REPLACE TABLE `dimension`
+(
+    `id_dimension` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+  , `identifier` VARCHAR(40) NOT NULL UNIQUE
+  , `description` VARCHAR(50)
+);
+
+
 /* Pretty self explainatory. A measured result consists of its result,
 a unit as well as an uncertainty. */
 CREATE OR REPLACE TABLE `unit`
@@ -5,6 +14,8 @@ CREATE OR REPLACE TABLE `unit`
     `id_unit` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `identifier` VARCHAR(40) NOT NULL UNIQUE
   , `description` VARCHAR(50)
+    -- Foreign key: dimension.
+  , `id_dimension` INTEGER REFERENCES `dimension` (`id_dimension`)
 );
 
 

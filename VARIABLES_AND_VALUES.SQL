@@ -4,7 +4,7 @@ Part of the lucentLIMS project.
 Copyright: GPLv3
 
 LucentLIMS is supposed to store not only measurement results but also other information that was
-obtained during the procedures that lead to their quantification. Like the visual impression of a
+obtained during the lifecycle that lead to their quantification. Like the visual impression of a
 sample or a confirmation that a sample ideed was filtrated.
 
 The database entity that contains this infomration is the table `value`. Such a value is
@@ -15,19 +15,23 @@ own SQL file).
 
 
 /* Instances of `variable` will fill up the activity data. It can be many things
-and is mostly a property of an action. Like a measurement result but also some other
+and is always a property of an action. Like a measurement result but also some other
 meta data like "was sample x filtrated"? */
 -- TODO: Connect to comound?
 CREATE OR REPLACE TABLE `variable`
 (
     `id_variable` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `identifier` VARCHAR(20) UNIQUE NOT NULL
-  -- Later, when a variable is equipped with a value, the respective entry has
-  -- to be put in a fitting column. Everything in a VARACHAR would violate NF1.
+    -- Later, when a variable is equipped with a value, the respective entry has
+    -- to be put in a fitting column. Everything in a VARACHAR would violate NF1.
   , `value_class` VARCHAR(20) NOT NULL CHECK(
         `value_class` IN ('decimal', 'text', 'boolean', 'datetime')
     )
+    -- A short description of this var. Mostly for the end user.
   , `description` VARCHAR(50)
+    -- While it isn't clear what unit the value of var will have, the dimension
+    -- should always be clear. A date cannot have dimension "mass" but "time".
+  , `id_dimension` INTEGER REFERENCES `dimension` (`id_dimension`)
 );
 
 
@@ -40,9 +44,7 @@ CREATE OR REPLACE TABLE `j_action_variable`
   , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
   , `id_variable` INTEGER NOT NULL REFERENCES `variable` (`id_variable`)
   -- Which unit is usually used? Can be overwritten in `result`.
-  -- TODO: Mark this as default somehow.
   , `id_unit` INTEGER REFERENCES `unit` (`id_unit`)
-  -- TODO: This seems fishy. Nothing of this can be seriously predicted. No convenience functions…
   -- What uncertainty is to be expected?
   , `uncertainty` DOUBLE
   -- Is this a relative or absolute value? (Percentage or actual value?)
@@ -55,19 +57,19 @@ CREATE OR REPLACE TABLE `j_action_variable`
 
 
 
-/* Assign actions and (some or all of) their respective variables to a procedure. */
-CREATE OR REPLACE TABLE `j_procedure_action_variable`
+/* Assign actions and some or all of their respective variables to a lifecycle. */
+CREATE OR REPLACE TABLE `j_lifecycle_action_variable`
 (
-    `id_j_procedure_action_variable` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  -- To which procedure should the variables be added to?
-  , `id_procedure` INTEGER REFERENCES `procedure` (`id_procedure`)
-  -- Now this is where it gets tricky. You can't just add individual ids of actions and variables
-  -- to a procedure. This is against normal form 4 (or 5?). Because you could add a variable x that
-  -- isn't really asosciated with action y.
-  -- To avoid that, add a record from another junction table.
+    `id_j_lifecycle_action_variable` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    -- To which lifecycle should the variables be added to?
+  , `id_lifecycle` INTEGER REFERENCES `lifecycle` (`id_lifecycle`)
+    -- Now this is where it gets tricky. You can't just add individual ids of actions and variables
+    -- to a lifecycle. This is against normal form 4 (or 5?). Because you could add a variable
+    -- x that isn't really asosciated with action y.
+    -- To avoid that, add a record from another junction table.
   , `id_j_action_variable` INTEGER REFERENCES `j_action_variable` (`id_j_action_variable`)
-  -- Make sure such a connection cannot be added redundantly.
-  , CONSTRAINT `pav_unique` UNIQUE(`id_procedure`, `id_j_action_variable`)
+    -- Make sure such a connection cannot be added redundantly.
+  , CONSTRAINT `pav_unique` UNIQUE(`id_lifecycle`, `id_j_action_variable`)
 );
 
 
@@ -220,33 +222,34 @@ DELIMITER ;
 Most prominently measurement results. But it can be a lot of things, like a confirmation
 that a sample has been disposed of.
 Also many different data types for the value itself are possbible. Decimal for measurement
-results, booleans for a status, text for a description, an rgb value, and so on.
-This is why there is no field for the actual value in `value`. */
+results, booleans for a status, text for a description, an rgb value, and so on. */
 -- TODO: Think about wether it might be better to have records in `value` entered
 -- only if a result is available. Not before.
--- The junction between `collection` and `procedure` should already tell what variables
+-- The junction between `collection` and `lifecycle` should already tell what variables
 -- are to be exptected.
 -- This would make the the first constraint a little easier since EXACTLY one
 -- value columns has to be filled.
 CREATE OR REPLACE TABLE `value`
 (
     `id_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  -- To which collection do these values belong to?
-  -- This asosciation is created automatically when a procedure is attached to a collection
-  -- the corresponding variables (of which values can be seen as an instance) are stored here.
+    -- To which collection do these values belong to?
+    -- This asosciation is created automatically when a lifecycle is attached to a collection.
+    -- The corresponding variables (of which values can be seen as an instance) are stored here.
   , `id_collection` INTEGER NOT NULL REFERENCES `collection` (`id_collection`)
-  -- What variables are to be provided with values?
-  -- From this refrence we can derive the `procedure`, `action` and `variable`.
-  , `id_j_procedure_action_variable` INTEGER NOT NULL
-        REFERENCES `j_procedure_action_variable` (`id_j_procedure_action_variable`)
-  -- Someone has to accept all entered values.
-  -- TODO: This should trigger an entry in `event`.
-  -- The actual value.
+    -- What variables are to be provided with values?
+    -- From this reference we can derive the `lifecycle`, `action` and `variable`.
+  , `id_j_lifecycle_action_variable` INTEGER NOT NULL
+        REFERENCES `j_lifecycle_action_variable` (`id_j_lifecycle_action_variable`)
+    -- A value can be measured multiple times. Not to be confused with raw values
+    -- that are repeatadly measured to increase precision.
+    -- More like repeated measurements for time series.
+  , `repetition` INTEGER DEFAULT 0
+    -- The actual value.
   , `decimal` DECIMAL
   , `text` VARCHAR(50)
   , `boolean` BOOLEAN
   , `datetime` DATETIME
-  --
+  -- Someone has to accept all entered values.
   , `accepted` BOOLEAN NOT NULL DEFAULT FALSE
   -- Make sure that at most one of the value columns is filled.
   , CONSTRAINT `one_entry_for_value_only` CHECK(  -- YUCK YUCK YUCK
@@ -262,7 +265,7 @@ CREATE OR REPLACE TABLE `value`
       (`decimal` IS NULL AND `text` IS NULL AND `boolean` IS NULL AND `datetime` IS NOT NULL)
     )
   -- Make sure that a collection can hold each value only one time.
-  , CONSTRAINT `id_collection_id_j_procedure_action_variable_unqiue` UNIQUE(
-      `id_collection`, `id_j_procedure_action_variable`
+  , CONSTRAINT `id_collection_id_j_lifecycle_action_variable_unqiue` UNIQUE(
+      `id_collection`, `id_j_lifecycle_action_variable`
     )
 );

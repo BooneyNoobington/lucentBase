@@ -1,0 +1,11 @@
+tables:
+    organisation:
+        columns:
+            id_organisation:
+                attributes: ["primary key", "no editing"]
+            identifier:
+                attributes: ["readable key"]
+            short_identifier:
+            connection:
+                attributes: ["list"]
+                allowed values: ["contractor", "client", "partner", "hostile"]
