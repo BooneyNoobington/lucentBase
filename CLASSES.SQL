@@ -25,7 +25,7 @@ CREATE OR REPLACE TABLE `object`
     `id_object` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT
   , `identifier` VARCHAR(40) UNIQUE NOT NULL
   -- Connect to a specific site that has the focus of the analysis.
-  , `id_site` INTEGER REFERENCES `site` (`id_site`)
+  , `id_spot` INTEGER REFERENCES `spot` (`id_spot`)
   -- Important for physical samples. Can be null if not applicable.
   , `id_matrix` INTEGER REFERENCES `matrix` (`id_matrix`)
 );

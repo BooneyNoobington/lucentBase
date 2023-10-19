@@ -43,6 +43,18 @@ CREATE OR REPLACE TABLE `address`
     )
 );
 
+
+/* Some information is geographical and has coordinates. So a coordinate reference
+system is needed. */
+CREATE OR REPLACE TABLE `crs`
+(
+    `id_crs` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+  , `epsg` INTEGER NOT NULL
+  , `identifier` VARCHAR(25) UNIQUE NOT NULL
+  , `description` VARCHAR(150)
+);
+
+
 /* This is the general place an investigation takes places. It could be anything
 from a part of a beach to a crime scene. */
 CREATE OR REPLACE TABLE `site`
@@ -50,14 +62,46 @@ CREATE OR REPLACE TABLE `site`
     `id_site` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `identifier` VARCHAR(20) UNIQUE NOT NULL
   , `class` VARCHAR(30) NOT NULL
-  -- TODO: This is a problem. You can enter an address that has nothing to do with
-  -- the district you entered. Solution: Just allow an address.
-  -- Other solution: Only the district or the address are to be given. Not both.
-  , `id_district` INTEGER REFERENCES `district` (`id_district`)
+    -- An address is one possibility to make clear, where the site is located.
   , `id_address` INTEGER REFERENCES `address` (`id_address`)
-  , CHECK (
-      (`id_district` IS NOT NULL AND `id_address` IS NULL)
-      OR
-      (`id_address` IS NOT NULL AND `id_district` IS NULL)
-    )
+    -- A site can be represented by a polygon.
+  , `borders` POLYGON
+  , `id_crs` INTEGER REFERENCES `crs` (`id_crs`)
+    -- But a description is fine too.
+  , `description` VARCHAR(50)
+    -- A site needs either an address, a polygon of coordinates surrounding it or just a description
+  , CHECK(`id_address` IS NOT NULL OR `borders` IS NOT NULL OR `description` IS NOT NULL)
+    -- TODO: When a polygon of coordinates is given, we also need a coordinate reference system.
 );
+
+
+/* The exact place where a investigation takes place is called a spot.
+A site can have multiple spots.*/
+CREATE OR REPLACE TABLE `spot`
+(
+    `id_spot` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+  , `identifier` VARCHAR(50) UNIQUE NOT NULL
+    -- A spot can be equipped with coordinates.
+  , `x` DOUBLE
+  , `y` DOUBLE
+  , `id_crs` INTEGER REFERENCES `crs` (`id_crs`)
+    -- Or just a description like "Hudson River Pier".
+  , `description` VARCHAR(50)
+    -- Link this spot to a specific site.
+  , `id_site` INTEGER REFERENCES `site` (`id_site`)
+    -- Make sure that at least a description or coordinates are provided.
+  , CHECK (`description` IS NOT NULL OR (`x` IS NOT NULL AND `y` IS NOT NULL))
+);
+
+/* Combine spots and the crs information into a view. */
+CREATE OR REPLACE VIEW `v_spot_crs` AS
+SELECT          s.`identifier` AS "Spot"
+              , s.`description` AS "Description"
+              , s.`x` AS "x Coordinate"
+              , s.`y` AS "y Coordinate"
+              , c.`identifier` AS "CRS"
+              , c.`epsg` AS "EPSG"
+FROM            `spot` s
+        JOIN    `crs` c
+        ON      c.`id_crs` = s.`id_crs`
+;
