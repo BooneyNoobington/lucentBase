@@ -7,13 +7,16 @@ like a pH probe or something mundane like a sample flask.
 CREATE OR REPLACE TABLE `device`
 (
     `id_device` INTEGER PRIMARY KEY UNIQUE NOT NULL
-  , `identifier` VARCHAR(50) NOT NULL
+  , `name` VARCHAR(50) NOT NULL
   -- A lab may have an array of pH probes, etc.. They might be called the same but have a
   -- different number.
   , `number` INTEGER NOT NULL
-  , `id_organisation` INTEGER REFERENCES `organisation` (`id_organisation`)  -- Manufacturer.
+  , `id_manufacturer` INTEGER REFERENCES `organisation` (`id_organisation`)  -- Manufacturer.
+  , `id_operator` INTEGER REFERENCES `organisation` (`id_organisation`)  -- Who uses it?
   -- Workers can lock a device if it should not be used for some reason.
-  -- Toggling the active state should create an `event` every time
+  -- Toggling the active state should create a log entry.
   , `active` BOOLEAN NOT NULL DEFAULT TRUE
-  , CONSTRAINT name_and_number_unqiue UNIQUE(identifier, number)
+  , CONSTRAINT `name_and_number_unqiue` UNIQUE(`name`, `number`)
+    -- Recycle bin.
+  , `vis` BOOLEAN NOT NULL DEFAULT TRUE
 );

@@ -63,3 +63,7 @@ SOURCE VARIABLES_AND_VALUES.SQL
 -- Now that smaller clusters of tables are prepared, they
 -- can be connected in a global fashion.
 SOURCE GLOBAL_CONNECTION.SQL
+
+-- Add further triggers.
+-- TODO: These triggers set `vis` to false in junction tables. So they probably aren't needed.
+-- SOURCE TRIGGERS.SQL
