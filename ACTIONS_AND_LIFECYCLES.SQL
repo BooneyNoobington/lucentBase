@@ -1,5 +1,5 @@
 /* Many records may have actual files attached to them on a file
-system level. Or in content management systems a web page can
+system level. Or  a web page can
 hold relevant information. A "link" to these files and pages is found here. */
 CREATE OR REPLACE TABLE `link`
 (
@@ -138,21 +138,6 @@ CREATE OR REPLACE TABLE `j_action_person`
     -- All of these attributes combined are unique.
   , CONSTRAINT `id_action_id_person_role` UNIQUE(`id_action`, `id_person`, `role`)
 	-- Recycle bin.
-  , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
-);
-
-
-
-/* An action can have a narrowed application. E.g. a HPLC measurement might
-work with groundwater but not blood. */
-CREATE OR REPLACE TABLE `j_action_object`
-(
-    `id_action_object` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  , `id_object` INTEGER NOT NULL REFERENCES `object` (`id_object`)
-  , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
-    -- Avoind redundant connections.
-  , CONSTRAINT `id_action_id_object_unique` UNIQUE(`id_action`, `id_object`)
-  	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
 );
 

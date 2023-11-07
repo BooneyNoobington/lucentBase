@@ -33,13 +33,3 @@ CREATE OR REPLACE TABLE `message`
     -- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
 );
-
-
-
-/* A table with a list of unique strings to use as primary keys. */
-CREATE OR REPLACE TABLE `safe_number`
-(
-	`id_safe_number` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  , `unique_string` VARCHAR(50) NOT NULL
-  , `used` BOOLEAN NOT NULL DEFAULT FALSE
-);
