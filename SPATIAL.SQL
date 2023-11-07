@@ -94,7 +94,6 @@ CREATE OR REPLACE TABLE `site`
 (
     `id_site` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `name` VARCHAR(20) UNIQUE NOT NULL
-  , `site_class` VARCHAR(30) NOT NULL
     -- An address (house number) is one possibility to make clear, where the site is located.
   , `id_house` INTEGER REFERENCES `house` (`id_house`)
     -- A site can also be represented by a polygon.

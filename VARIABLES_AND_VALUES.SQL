@@ -46,15 +46,17 @@ CREATE OR REPLACE TABLE `j_variable_variable`
 	`id_j_variable_variable` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `id_variable1` INTEGER REFERENCES `variable` (`id_variable`)
   , `id_variable2` INTEGER REFERENCES `variable` (`id_variable`)
+    -- A short explaination why the two variables are connected together.
+  , `description` VARCHAR(50)
   	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
 );
 
 
-/* Join up an action and a variable that should be asosciated with it. */
+/* Relate an action and a variable. */
 CREATE OR REPLACE TABLE `j_action_variable`
 (
-    `id_j_action_variable` INTEGER PRIMARY KEY UNIQUE NOT NULL
+    `id_j_action_variable` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
 	-- Which action contains which variables?
   , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
   , `id_variable` INTEGER NOT NULL REFERENCES `variable` (`id_variable`)
@@ -63,7 +65,7 @@ CREATE OR REPLACE TABLE `j_action_variable`
 	-- Is this a relative or absolute value? (Percentage or actual value?)
   , `uncertainty_class` VARCHAR(9)
 	-- In which unit is the uncertainty provided?
-  , `uncertainty_unit` INTEGER REFERENCES `unit` (`id_unit`)
+  , `uncertainty_id_unit` INTEGER REFERENCES `unit` (`id_unit`)
 	-- How is the corresponding end result calculated? Points to a (usually r) file.
   , `calculation` VARCHAR(40)
 	-- Recycle bin.
@@ -73,165 +75,21 @@ CREATE OR REPLACE TABLE `j_action_variable`
 
 
 /* Assign actions and some or all of their respective variables to a lifecycle. */
-CREATE OR REPLACE TABLE `j_lifecycle_action_variable`
-(
-    `id_j_lifecycle_action_variable` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- To which lifecycle should the variables be added to?
-  , `id_lifecycle` INTEGER REFERENCES `lifecycle` (`id_lifecycle`)
-    -- Now this is where it gets tricky. You can't just add individual ids of actions and variables
-    -- to a lifecycle. This is against normal form 4 (or 5?). Because you could add a variable
-    -- x that isn't really asosciated with action y.
-    -- To avoid that, add a record from another junction table.
-  , `id_j_action_variable` INTEGER REFERENCES `j_action_variable` (`id_j_action_variable`)
-    -- Make sure such a connection cannot be added redundantly.
-  , CONSTRAINT `pav_unique` UNIQUE(`id_lifecycle`, `id_j_action_variable`)
-  	-- Recycle bin.
-  , `vis` BOOLEAN NOT NULL DEFAULT TRUE    
-);
-
-
-
--- /* Raw values are inserted in an somewhat unplanned manner. Every time an action
--- produces a result, it can be inserted into the database in a non nomralized manner.
--- Hence the prefix "nn".
--- This information does not have to be normalized since it is part of an interface. Nor
--- does it have to be equivalent to the names in the datbase.
--- For instance a results file can hold information about a 'pH-value' but the corresponding
--- `variable` can be called just 'pH'. */
--- CREATE OR REPLACE TABLE `nn_raw_value`
+-- CREATE OR REPLACE TABLE `j_lifecycle_action_variable`
 -- (
---     `id_nn_raw_value` INTEGER NOT NULL PRIMARY KEY UNIQUE AUTO_INCREMENT
---   -- Whatever idefication for a sample or something similar was provided to the interface.
---   -- E.g. by a results file.
---   -- The prefiy "map" means, that in the tables of `lucent` these columns have different names.
---   -- But normally a distinct mapping between something like a sample if from a results file
---   -- and `id_collection` should be possible.
---   , `map_collection` VARCHAR(40) NOT NULL
---   -- What was done, logged, measured … ?
---   , `map_variable` VARCHAR(40) NOT NULL
---   -- This varaible got its value by what action?
---   , `map_action` VARCHAR(40) NOT NULL
---   -- From wich device comes the reading?
---   , `map_device` VARCHAR(40) NOT NULL  -- Can't be null in QM sensitive applications.
---   -- Who did create this value?
---   , `map_person` VARCHAR(40)  NOT NULL  -- In QM relevant applications definitively NOT NULL.
---   -- When was the value aquired?
---   , `moment` VARCHAR(40) NOT NULL
---   -- What was the actual result and which unit has it?
---   , `decimal_value` DECIMAL(30,20)
---   , `text_value` VARCHAR(250)
---   , `boolean_value` BOOLEAN
---   , `datetime_value` DATETIME
---   , `map_unit` VARCHAR(40)  -- A textual result like the description of a sample has no unit.
---   , `map_uncertainty` VARCHAR(40)  -- Same here.
---   -- Raw results need to be either accepted or declined.
---   -- Otherwise it wouldn't be clear how to deal with them in a calculation.
---   , `accepted` BOOLEAN NOT NULL DEFAULT 0  -- By default no value is accepted.
---   -- Many measurements are performed in diluted samples.
---   , `dilution` DECIMAL
---   -- Make sure exactly one result type (decimal, text, boolean, date) is given.
---   , CONSTRAINT `one_result_type_only` CHECK(
---         (
---           `decimal_value` IS NOT NULL
---           AND `text_value` IS NULL
---           AND `boolean_value` IS NULL
---           AND `datetime_value` IS NULL
---         )
---         OR
---         (
---           `decimal_value` IS NULL
---           AND `text_value` IS NOT NULL
---           AND `boolean_value` IS NULL
---           AND `datetime_value` IS NULL
---         )
---         OR
---         (
---           `decimal_value` IS NULL
---           AND `text_value` IS NULL
---           AND `boolean_value` IS NOT NULL
---           AND `datetime_value` IS NULL
---         )
---         OR
---         (
---           `decimal_value` IS NULL
---           AND `text_value` IS NULL
---           AND `boolean_value` IS NULL
---           AND `datetime_value` IS NOT NULL
---         )
---     )
---   -- Make sure the same result (line) is only entered once.
---   , CONSTRAINT `unique_results_only` UNIQUE(
---         `map_collection`
---       , `map_variable`
---       , `map_action`
---       , `moment`
---     )
+--     `id_j_lifecycle_action_variable` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+--     -- To which lifecycle should the variables be added to?
+--   , `id_lifecycle` INTEGER REFERENCES `lifecycle` (`id_lifecycle`)
+--     -- Now this is where it gets tricky. You can't just add individual ids of actions and variables
+--     -- to a lifecycle. This is against normal form 4 (or 5?). Because you could add a variable
+--     -- x that isn't really asosciated with action y.
+--     -- To avoid that, add a record from another junction table.
+--   , `id_j_action_variable` INTEGER REFERENCES `j_action_variable` (`id_j_action_variable`)
+--     -- Make sure such a connection cannot be added redundantly.
+--   , CONSTRAINT `pav_unique` UNIQUE(`id_lifecycle`, `id_j_action_variable`)
+--   	-- Recycle bin.
+--   , `vis` BOOLEAN NOT NULL DEFAULT TRUE
 -- );
-
-
-
--- /* All things can have different names. A sample can have a different id from lab
--- to lab. Maybe one lab counts every collected flask as an individual sample
--- and another does not.
--- These different names can be mapped here.*/
--- CREATE OR REPLACE TABLE `mapping`
--- (
---     `id_mapping` INTEGER NOT NULL UNIQUE PRIMARY KEY AUTO_INCREMENT
---   -- Alternative name for a characterizing element like a sample id or
---   -- a CAS number.
---   , `alternative_identifier` VARCHAR(50) NOT NULL
---   -- Which table is alternative name referring to?
---   , `referenced_table` VARCHAR(40) NOT NULL
---   -- The foreign key for the referenced table.
---   -- Can be NULL at first. The app is responsible to let the user make the connection.
---   , `id_referenced_table` INTEGER
--- );
-
--- /* This trigger ensures that the reference between `alternative_identifier` and the respective
--- table given by `referenced_table` is valid. */
--- DELIMITER $$  -- Temporarily change the delimiter to allow for an "outer" definition (BEGIN to END).
--- CREATE TRIGGER `t_mapping_validation`
--- -- Whenever a new record is inserted or an existing one changed fire this trigger.
--- BEFORE INSERT ON `mapping`
--- FOR EACH ROW  -- For every added or changed record.
--- BEGIN
---     -- Declare a new variable holding the name of the referenced table.
---     DECLARE v_referenced_table VARCHAR(50);
---     SET v_referenced_table = NEW.`referenced_table`;
-
---     -- Check wether the referenced table eveny exists.
---     IF (
---             SELECT              COUNT(*)
---             FROM                `information_schema`.tables
---             WHERE               `table_schema` = DATABASE()
---                           AND   `table_name` = v_referenced_table
---     ) = 0 THEN
---         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Foreign key violation: referenced
---         table does not exist.';
---     END IF;
-
---     -- If an id for referenced table was provided, check wether such a  value actually exists
---     -- within the referenced table.
---     IF NEW.`id_referenced_table` IS NOT NULL THEN
---         IF (
---             SELECT              COUNT(*)
---             FROM                `information_schema`.columns
---             WHERE               `table_schema` = DATABASE()
---                           AND   `table_name` = v_referenced_table
---                           AND   `column_name` = 'id_' || v_referenced_table
---                           AND   `column_type` LIKE 'int%' -- Assumes that the ID column is an int.
---                           AND   EXISTS (
---                                     SELECT   1
---                                     FROM     v_referenced_table
---                                     WHERE    `id_` || v_referenced_table = NEW.`id_referenced_table`
---                                 )
---         ) = 0 THEN
---             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Foreign key violation:
---             referenced row does not exist.';
---         END IF;
---     END IF;
--- END $$
--- DELIMITER ;
 
 
 
@@ -249,8 +107,7 @@ CREATE OR REPLACE TABLE `value`
   , `id_collection` INTEGER NOT NULL REFERENCES `collection` (`id_collection`)
     -- What variables are to be provided with values?
     -- From this reference we can derive the `lifecycle`, `action` and `variable`.
-  , `id_j_lifecycle_action_variable` INTEGER NOT NULL
-        REFERENCES `j_lifecycle_action_variable` (`id_j_lifecycle_action_variable`)
+  , `id_j_action_variable` INTEGER NOT NULL REFERENCES `j_action_variable` (`id_j_action_variable`)
     -- A value can be measured multiple times. Not to be confused with raw values
     -- that are repeatadly measured to increase precision.
     -- More like repeated measurements for time series.
@@ -261,29 +118,90 @@ CREATE OR REPLACE TABLE `value`
     -- Or because remeasuring is to be exptected. E.g. in a time series.
     -- The actual value.
   , `repetition_class` VARCHAR(20) CHECK (`repetition_class` IN ('time series', 'remeasuring'))
-  , `decimal` DECIMAL
-  , `text` VARCHAR(50)
-  , `boolean` BOOLEAN
-  , `datetime` DATETIME
+
+    -- The actual value.
+  , `decimal_value` DECIMAL
+  , `text_value` VARCHAR(50)
+  , `boolean_value` BOOLEAN
+  , `datetime_value` DATETIME
+
   -- Someone has to accept all entered values.
   , `accepted` BOOLEAN NOT NULL DEFAULT FALSE
   -- Make sure that at most one of the value columns is filled.
   , CONSTRAINT `one_entry_for_value_only` CHECK(  -- YUCK YUCK YUCK
       -- No entry in any of the value columns is allowed.
-      (`decimal` IS NULL AND `text` IS NULL AND `boolean` IS NULL AND `datetime` IS NULL)
+      (`decimal_value` IS NULL AND `text_value` IS NULL AND `boolean_value` IS NULL AND `datetime_value` IS NULL)
       OR
-      (`decimal` IS NOT NULL AND `text` IS NULL AND `boolean` IS NULL AND `datetime` IS NULL)
+      (`decimal_value` IS NOT NULL AND `text_value` IS NULL AND `boolean_value` IS NULL AND `datetime_value` IS NULL)
       OR
-      (`decimal` IS NULL AND `text` IS NOT NULL AND `boolean` IS NULL AND `datetime` IS NULL)
+      (`decimal_value` IS NULL AND `text_value` IS NOT NULL AND `boolean_value` IS NULL AND `datetime_value` IS NULL)
       OR
-      (`decimal` IS NULL AND `text` IS NULL AND `boolean` IS NOT NULL AND `datetime` IS NULL)
+      (`decimal_value` IS NULL AND `text_value` IS NULL AND `boolean_value` IS NOT NULL AND `datetime_value` IS NULL)
       OR
-      (`decimal` IS NULL AND `text` IS NULL AND `boolean` IS NULL AND `datetime` IS NOT NULL)
+      (`decimal_value` IS NULL AND `text_value` IS NULL AND `boolean_value` IS NULL AND `datetime_value` IS NOT NULL)
     )
   -- Make sure that a collection can hold each value only one time.
-  , CONSTRAINT `id_collection_id_j_lifecycle_action_variable_unqiue` UNIQUE(
-      `id_collection`, `id_j_lifecycle_action_variable`, `repetition`
+  , CONSTRAINT `id_collection_id_j_variable_unqiue` UNIQUE(
+      `id_collection`, `id_j_action_variable`, `repetition`
     )
   	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE      
+);
+
+
+
+/* Just as two variables can belong together, their values can do so too. */
+CREATE OR REPLACE TABLE `j_value_value`
+(
+    `id_j_value_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+  , `id_value1` INTEGER NOT NULL REFERENCES `value` (`id_value`)
+  , `id_value2` INTEGER NOT NULL REFERENCES `value` (`id_value`)
+);
+
+
+
+
+/* Raw values come directly from entry or an entry or an import file. */
+/* The second heart of lucent are values that are attributed to specific variables.
+Most prominently measurement results. But it can be a lot of things, like a confirmation
+that a sample has been disposed of.
+Also many different data types for the value itself are possbible. Decimal for measurement
+results, booleans for a status, text for a description, an rgb value, and so on. */
+CREATE OR REPLACE TABLE `raw_value`
+(
+    `id_raw_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    -- A value can always be traced back to one or more raw values.
+  , `id_value` INTEGER REFERENCES `value` (`id_value`)
+    -- When was this raw value generated?
+  , `t` DATETIME NOT NULL
+    -- Who generated the value?
+  , `id_person` INTEGER REFERENCES `person` (`id_person`)
+    -- On which device was the value generated on?
+  , `id_device` INTEGER REFERENCES `device` (`id_device`)
+
+    -- Actual value.
+  , `decimal_raw_value` DECIMAL
+  , `text_raw_value` VARCHAR(50)
+  , `boolean_raw_value` BOOLEAN
+  , `datetime_raw_value` DATETIME
+
+    -- As soon as all the raw values assigned to a final value are set to true OR false
+    -- the front end should trigger a calculation.
+  , `accepted` BOOLEAN
+
+    -- Make sure that at most one of the value columns is filled.
+  , CONSTRAINT `one_entry_for_value_only` CHECK(  -- YUCK YUCK YUCK
+      -- No entry in any of the value columns is allowed.
+      (`decimal_raw_value` IS NULL AND `text_raw_value` IS NULL AND `boolean_raw_value` IS NULL AND `datetime_raw_value` IS NULL)
+      OR
+      (`decimal_raw_value` IS NOT NULL AND `text_raw_value` IS NULL AND `boolean_raw_value` IS NULL AND `datetime_raw_value` IS NULL)
+      OR
+      (`decimal_raw_value` IS NULL AND `text_raw_value` IS NOT NULL AND `boolean_raw_value` IS NULL AND `datetime_raw_value` IS NULL)
+      OR
+      (`decimal_raw_value` IS NULL AND `text_raw_value` IS NULL AND `boolean_raw_value` IS NOT NULL AND `datetime_raw_value` IS NULL)
+      OR
+      (`decimal_raw_value` IS NULL AND `text_raw_value` IS NULL AND `boolean_raw_value` IS NULL AND `datetime_raw_value` IS NOT NULL)
+    )
+  	-- Recycle bin.
+  , `vis` BOOLEAN NOT NULL DEFAULT TRUE
 );

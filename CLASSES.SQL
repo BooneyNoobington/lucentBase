@@ -26,6 +26,7 @@ CREATE OR REPLACE TABLE `object`
 (
     `id_object` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT
   , `name` VARCHAR(40) UNIQUE NOT NULL
+  , `description` VARCHAR(100)
   -- Important for physical samples. Can be null if not applicable.
   , `id_matrix` INTEGER REFERENCES `matrix` (`id_matrix`)
     -- Recycle bin.
@@ -39,9 +40,9 @@ CREATE OR REPLACE TABLE `object`
 /* This is essential to categorize a container / sample. It mostly describes how
 a cointainer of values, no matter if it is a sample or some measurement series was
 conducted in general. E.g. was surface water collected over time or as a spot sample? */
-CREATE OR REPLACE TABLE `collectionclass`
+CREATE OR REPLACE TABLE `collection_class`
 (
-    `id_collectionclass` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    `id_collection_class` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `name` VARCHAR(20) NOT NULL UNIQUE
   , `description` VARCHAR(250)
     -- Recycle bin.

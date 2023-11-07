@@ -32,13 +32,15 @@ BEGIN
     SET v_id_collection = NEW.`id_collection`;
     SET v_id_lifecycle = NEW.`id_lifecycle`;
 
+    -- Insert a combination of a collection id and a fitting variable id into `value`.
     INSERT INTO     `value`
-                    (`id_collection`, `id_j_lifecycle_action_variable`, `accepted`)
+                    (`id_collection`, `id_j_lifecycle_action_variable`)
     SELECT          v_id_collection
                   , `j_lifecycle_action_variable`.`id_j_lifecycle_action_variable`
                   , v_id_lifecycle
     FROM            `j_lifecycle_action_variable`
     WHERE           `j_lifecycle_action_variable`.`id_lifecycle` = v_id_lifecycle;
+
 
 END $$
 DELIMITER ;  -- Reset to standard.

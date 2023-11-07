@@ -24,7 +24,7 @@ This is okay because how would you transfer a message to someone who couldn't
 even log into to the system. */
 CREATE OR REPLACE TABLE `message`
 (
-    `id_message` INTEGER PRIMARY KEY UNIQUE NOT NULL
+    `id_message` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `sender` VARCHAR(20) NOT NULL REFERENCES `person` (`unix_account`)
   , `reciever` VARCHAR(20) NOT NULL REFERENCES `person` (`unix_account`)
   , `subject` VARCHAR(250) NOT NULL
@@ -32,4 +32,14 @@ CREATE OR REPLACE TABLE `message`
   , `read` BOOLEAN NOT NULL DEFAULT 0
     -- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
+);
+
+
+
+/* A table with a list of unique strings to use as primary keys. */
+CREATE OR REPLACE TABLE `safe_number`
+(
+	`id_safe_number` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+  , `unique_string` VARCHAR(50) NOT NULL
+  , `used` BOOLEAN NOT NULL DEFAULT FALSE
 );

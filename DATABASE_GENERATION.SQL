@@ -31,6 +31,9 @@ USE `lucent`;  -- Only database to be used.
 
 
 
+-- Scientific information like units and constants.
+SOURCE SCIENTIFIC.SQL
+
 -- Spatial Information: Cities, sampling sites, addresses.
 SOURCE SPATIAL.SQL;
 
@@ -42,9 +45,6 @@ SOURCE MISCELLANEOUS.SQL;
 
 -- Sample types, matrizes, etc..
 SOURCE CLASSES.SQL
-
--- Scientific information like units and constants.
-SOURCE SCIENTIFIC.SQL
 
 -- Information about measurement instruments, flasks, and so on.
 -- Everything one needs to complete a specific action.
@@ -62,7 +62,7 @@ SOURCE VARIABLES_AND_VALUES.SQL
 
 -- Now that smaller clusters of tables are prepared, they
 -- can be connected in a global fashion.
-SOURCE GLOBAL_CONNECTION.SQL
+-- TODO: Might be unneccesary. SOURCE GLOBAL_CONNECTION.SQL
 
 -- Add further triggers.
 -- TODO: These triggers set `vis` to false in junction tables. So they probably aren't needed.

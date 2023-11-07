@@ -4,11 +4,11 @@ hold relevant information. A "link" to these files and pages is found here. */
 CREATE OR REPLACE TABLE `link`
 (
     `id_link` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT
-  , `name` VARCHAR(40) UNIQUE NOT NULL
+  , `name` VARCHAR(50) UNIQUE NOT NULL
   , `url` VARCHAR(500)
   , `file_path` VARCHAR(500)
   -- Every time "accepted" changes to TRUE, the app has to calculate the sha256 sum.
-  , `accepted` BOOLEAN NOT NULL DEFAULT 0
+  , `accepted` BOOLEAN NOT NULL DEFAULT FALSE
   , `SHA256` VARCHAR(64)  -- Make sure the file wasn't tampered with.
   -- Make sure at least a file or an url is given.
   ,  CONSTRAINT file_or_url CHECK (
@@ -32,7 +32,7 @@ CREATE OR REPLACE TABLE `sop`
 (
     `id_sop` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT
   , `name` VARCHAR(40) UNIQUE NOT NULL
-  , `active` BOOLEAN NOT NULL
+  , `active` BOOLEAN NOT NULL DEFAULT FALSE
     -- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
 );
@@ -85,49 +85,44 @@ CREATE OR REPLACE TABLE `action`
 );
 
 
-/* Often times many actions are needed to be performed to do whatever is desired to
-happen with a collection such as a sample. These are combined in a "lifecycle".
-A lifecycle is selective concerning variables. Not all variables of an action are
-required.
-In lucentLIMS it is mandatory to provide "lifecycles", not just optional. */
-CREATE OR REPLACE TABLE `lifecycle`
-(
-    `id_lifecycle` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  , `name` VARCHAR(50) UNIQUE NOT NULL
-  , `iteration` DATETIME NOT NULL  -- Versioning.
-    -- Name (and version) alone don't have to be unique. But in combination
-    -- they should be.
-  , CONSTRAINT `name_iteration_unique` UNIQUE(`name`, `iteration`)
-	-- Recycle bin.
-  , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
-);
 
-
-/* A lifecycle also organizes the dependencies of actions upon one another.
-A samples' lifecycle can start by an action "sampling", then some measurement,
-result validation and end with some action describing disposal. */
-CREATE OR REPLACE TABLE `j_lifecycle_dependency`
+/* Actions depend on one another. This table organizes this dependecies. */
+CREATE OR REPLACE TABLE `j_action_dependency`
 (
     -- primary key.
     `id_action_action` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Dependencies are vallid for a specific lifecycle. Sometimes actions like "report_completion"
-    -- depend on only one measurement, sometimes dozens.
-  , `id_lifecycle` INTEGER REFERENCES `lifecycle` (`id_lifecycle`)
     -- Which action depends on which other action.
   , `id_dependant` INTEGER NOT NULL REFERENCES `action` (`id_action`)
   , `id_dependency` INTEGER NOT NULL REFERENCES `action` (`id_action`)
     -- Some dependencies are only recommended or completely optional.
   , `dependency_class` VARCHAR(12) NOT NULL CHECK (
-        `dependency_class` IN ('mandatory', 'recommended', 'optional')
+        `dependency_class` IN ('strict', 'possibility')
     )
     -- An optional description of what a dependency means.
   , `description` VARCHAR(100)
     -- Make sure there are no doubled paring of two actions.
-  , CONSTRAINT `id_action_id_action_unique` UNIQUE(`id_dependant`, `id_dependency`, `id_lifecycle`)
+  , CONSTRAINT `id_action_id_action_unique` UNIQUE(`id_dependant`, `id_dependency`)
 	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
 );
--- REMARK: The way this is structured, a lifecycle cannot consist of one singular action.
+
+
+
+/* The dependency table solves the chicken and egg problem in the "egg" direction.
+But to solve it in the "chicken" direction we need a second table. */
+CREATE OR REPLACE TABLE `j_action_implication`
+(
+    `id_j_action_implication` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    -- If this action is performed …
+  , `id_implier` INTEGER NOT NULL REFERENCES `action` (`id_action`)
+    -- this one automatically has to be performed too.
+  , `id_implication` INTEGER NOT NULL REFERENCES `action` (`id_action`)
+    -- Make sure there are no doubled paring of two actions.
+  , CONSTRAINT `id_action_id_action_unique` UNIQUE(`id_implier`, `id_implication`)
+    -- Recycle bin.
+  , `vis` BOOLEAN NOT NULL DEFAULT TRUE
+);
+
 
 
 /* Just like an sop has a connection to people, actions have these too. */
@@ -164,13 +159,13 @@ CREATE OR REPLACE TABLE `j_action_object`
 
 
 /* Same goes for a specific collectionclass. */
-CREATE OR REPLACE TABLE `j_action_collectionclass`
+CREATE OR REPLACE TABLE `j_action_collection_class`
 (
-    `id_action_collectionclass` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    `id_action_collection_class` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
-  , `id_collectionclass` INTEGER NOT NULL REFERENCES `collectionclass` (`id_collectionclass`)
+  , `id_collection_class` INTEGER NOT NULL REFERENCES `collection_class` (`id_collection_class`)
   -- Avoind redundant connections.
-  , CONSTRAINT `id_action_id_collectionclass_unqiue` UNIQUE(`id_action`, `id_collectionclass`)
+  , CONSTRAINT `id_action_id_collection_class_unqiue` UNIQUE(`id_action`, `id_collection_class`)
   	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE    
 );
