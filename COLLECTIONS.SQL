@@ -34,7 +34,7 @@ CREATE OR REPLACE TABLE `l_collection`
 (
     `id_l_collection` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
     -- Relate an entry to a record in the main table.
-  , `id_collection` INTEGER REFERENCES `colleciton` (`id_collection`)
+  , `id_collection` INTEGER REFERENCES `collection` (`id_collection`)
     -- What kind of change happened to the record? Update, Insert, deletion, ...?
   , `change` VARCHAR(50) NOT NULL
     -- When did the change occur?
