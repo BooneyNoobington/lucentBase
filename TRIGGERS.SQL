@@ -11,7 +11,7 @@ BEGIN
         -- Update vis in all ju"nction tables 
         -- connected to `person` based on the change in person.
         UPDATE `j_person_house` SET `vis` = NEW.`vis` WHERE `id_person` = NEW.`id_person`;
-        UPDATE `j_person_organisation` SET `vis` = NEW.`vis` WHERE `id_person` = NEW.`id_person`;
+        UPDATE `j_person_organization` SET `vis` = NEW.`vis` WHERE `id_person` = NEW.`id_person`;
         UPDATE `j_sop_person` SET `vis` = NEW.`vis` WHERE `id_person` = NEW.`id_person`;
         UPDATE `j_action_person` SET `vis` = NEW.`vis` WHERE `id_person` = NEW.`id_person`;
         -- ...

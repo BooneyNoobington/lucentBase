@@ -18,6 +18,31 @@ CREATE OR REPLACE TABLE `j_collection_lifecycle`
   , CONSTRAINT `id_collection_id_lifecycle_unique` UNIQUE (`id_collection`, `id_lifecycle`)
 );
 
+
+
+/* A sattelite table logging information about changes to
+the records in `j_collection_lifecycle`. */
+CREATE OR REPLACE TABLE `l_j_collection_lifecycle`
+(
+    `id_l_j_collection_lifecycle` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    -- Relate an entry to a record in the main table.
+  , `id_j_collection_lifecycle` INTEGER REFERENCES `j_collection_lifecycle` (`id_j_collection_lifecycle`)
+    -- What kind of change happened to the record? Update, Insert, deletion, ...?
+  , `change` VARCHAR(50) NOT NULL
+    -- When did the change occur?
+  , `t` DATETIME NOT NULL
+    -- Who performed the change?
+  , `id_person` INTEGER REFERENCES `person` (`id_person`)
+    -- Any additional information?
+  , `note` VARCHAR(500)
+    -- How did the record look before?
+    -- Every time a record is changed, this sum should be computable
+    -- of all the columns of the specific record. in the main table.
+  , `checksum` VARCHAR(100) NOT NULL
+);
+
+
+
 /* Every time a lifecycle is attached to a sample, insert all of the variables
 in the actions ascocciated to the lifecycle to the values table. */
 DELIMITER $$  -- Temporarily define a new delimieter so that ";" can be used to terminate stmts.

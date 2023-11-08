@@ -18,6 +18,30 @@ CREATE OR REPLACE TABLE `task`
 );
 
 
+
+/* A sattelite table logging information about changes to
+the records in `task`. */
+CREATE OR REPLACE TABLE `l_task`
+(
+    `id_l_task` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    -- Relate an entry to a record in the main table.
+  , `id_task` INTEGER REFERENCES `task` (`id_task`)
+    -- What kind of change happened to the record? Update, Insert, deletion, ...?
+  , `change` VARCHAR(50) NOT NULL
+    -- When did the change occur?
+  , `t` DATETIME NOT NULL
+    -- Who performed the change?
+  , `id_person` INTEGER REFERENCES `person` (`id_person`)
+    -- Any additional information?
+  , `note` VARCHAR(500)
+    -- How did the record look before?
+    -- Every time a record is changed, this sum should be computable
+    -- of all the columns of the specific record. in the main table.
+  , `checksum` VARCHAR(100) NOT NULL
+);
+
+
+
 /* Basically a little Mail client inside lucent.
 In this configuration only actual users can send messages.
 This is okay because how would you transfer a message to someone who couldn't
@@ -32,4 +56,27 @@ CREATE OR REPLACE TABLE `message`
   , `read` BOOLEAN NOT NULL DEFAULT 0
     -- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
+);
+
+
+
+/* A sattelite table logging information about changes to
+the records in `message`. */
+CREATE OR REPLACE TABLE `l_message`
+(
+    `id_l_message` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    -- Relate an entry to a record in the main table.
+  , `id_message` INTEGER REFERENCES `message` (`id_message`)
+    -- What kind of change happened to the record? Update, Insert, deletion, ...?
+  , `change` VARCHAR(50) NOT NULL
+    -- When did the change occur?
+  , `t` DATETIME NOT NULL
+    -- Who performed the change?
+  , `id_person` INTEGER REFERENCES `person` (`id_person`)
+    -- Any additional information?
+  , `note` VARCHAR(500)
+    -- How did the record look before?
+    -- Every time a record is changed, this sum should be computable
+    -- of all the columns of the specific record. in the main table.
+  , `checksum` VARCHAR(100) NOT NULL
 );

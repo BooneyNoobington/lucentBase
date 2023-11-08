@@ -33,6 +33,31 @@ CREATE OR REPLACE TABLE `street`
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+
+
+/* A sattelite table logging information about changes to
+the records in `street`. */
+CREATE OR REPLACE TABLE `l_street`
+(
+    `id_l_street` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    -- Relate an entry to a record in the main table.
+  , `id_street` INTEGER REFERENCES `street` (`id_street`)
+    -- What kind of change happened to the record? Update, Insert, deletion, ...?
+  , `change` VARCHAR(50) NOT NULL
+    -- When did the change occur?
+  , `t` DATETIME NOT NULL
+    -- Who performed the change?
+  , `id_person` INTEGER REFERENCES `person` (`id_person`)
+    -- Any additional information?
+  , `note` VARCHAR(500)
+    -- How did the record look before?
+    -- Every time a record is changed, this sum should be computable
+    -- of all the columns of the specific record. in the main table.
+  , `checksum` VARCHAR(100) NOT NULL
+);
+
+
+
 /* A house (identified by its number) is situated in a specific street which
 in turn is connected to a specific district and so on.*/
 CREATE OR REPLACE TABLE `house`
@@ -51,6 +76,31 @@ CREATE OR REPLACE TABLE `house`
     -- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE
 );
+
+
+
+/* A sattelite table logging information about changes to
+the records in `house`. */
+CREATE OR REPLACE TABLE `l_house`
+(
+    `id_l_house` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    -- Relate an entry to a record in the main table.
+  , `id_house` INTEGER REFERENCES `house` (`id_house`)
+    -- What kind of change happened to the record? Update, Insert, deletion, ...?
+  , `change` VARCHAR(50) NOT NULL
+    -- When did the change occur?
+  , `t` DATETIME NOT NULL
+    -- Who performed the change?
+  , `id_person` INTEGER REFERENCES `person` (`id_person`)
+    -- Any additional information?
+  , `note` VARCHAR(500)
+    -- How did the record look before?
+    -- Every time a record is changed, this sum should be computable
+    -- of all the columns of the specific record. in the main table.
+  , `checksum` VARCHAR(100) NOT NULL
+);
+
+
 
 /* The address related tables can be cumbersome. The follwing view provides
 a flatter table. */
@@ -88,6 +138,30 @@ CREATE OR REPLACE TABLE `crs`
 );
 
 
+
+/* A sattelite table logging information about changes to
+the records in `crs`. */
+CREATE OR REPLACE TABLE `l_crs`
+(
+    `id_l_crs` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    -- Relate an entry to a record in the main table.
+  , `id_crs` INTEGER REFERENCES `crs` (`id_crs`)
+    -- What kind of change happened to the record? Update, Insert, deletion, ...?
+  , `change` VARCHAR(50) NOT NULL
+    -- When did the change occur?
+  , `t` DATETIME NOT NULL
+    -- Who performed the change?
+  , `id_person` INTEGER REFERENCES `person` (`id_person`)
+    -- Any additional information?
+  , `note` VARCHAR(500)
+    -- How did the record look before?
+    -- Every time a record is changed, this sum should be computable
+    -- of all the columns of the specific record. in the main table.
+  , `checksum` VARCHAR(100) NOT NULL
+);
+
+
+
 /* This is the general place an investigation takes places. It could be anything
 from a part of a beach to a crime scene. */
 CREATE OR REPLACE TABLE `site`
@@ -106,6 +180,30 @@ CREATE OR REPLACE TABLE `site`
     -- TODO: When a polygon of coordinates is given, we also need a coordinate reference system.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE
 );
+
+
+
+/* A sattelite table logging information about changes to
+the records in `site`. */
+CREATE OR REPLACE TABLE `l_site`
+(
+    `id_l_site` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    -- Relate an entry to a record in the main table.
+  , `id_site` INTEGER REFERENCES `site` (`id_site`)
+    -- What kind of change happened to the record? Update, Insert, deletion, ...?
+  , `change` VARCHAR(50) NOT NULL
+    -- When did the change occur?
+  , `t` DATETIME NOT NULL
+    -- Who performed the change?
+  , `id_person` INTEGER REFERENCES `person` (`id_person`)
+    -- Any additional information?
+  , `note` VARCHAR(500)
+    -- How did the record look before?
+    -- Every time a record is changed, this sum should be computable
+    -- of all the columns of the specific record. in the main table.
+  , `checksum` VARCHAR(100) NOT NULL
+);
+
 
 
 /* The exact place where a investigation takes place is called a spot.
@@ -131,3 +229,25 @@ CREATE OR REPLACE TABLE `spot`
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE
   );
 
+
+
+/* A sattelite table logging information about changes to
+the records in `spot`. */
+CREATE OR REPLACE TABLE `l_spot`
+(
+    `id_l_spot` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    -- Relate an entry to a record in the main table.
+  , `id_spot` INTEGER REFERENCES `spot` (`id_spot`)
+    -- What kind of change happened to the record? Update, Insert, deletion, ...?
+  , `change` VARCHAR(50) NOT NULL
+    -- When did the change occur?
+  , `t` DATETIME NOT NULL
+    -- Who performed the change?
+  , `id_person` INTEGER REFERENCES `person` (`id_person`)
+    -- Any additional information?
+  , `note` VARCHAR(500)
+    -- How did the record look before?
+    -- Every time a record is changed, this sum should be computable
+    -- of all the columns of the specific record. in the main table.
+  , `checksum` VARCHAR(100) NOT NULL
+);
