@@ -39,29 +39,6 @@ CREATE OR REPLACE TABLE `variable`
 
 
 
-/* A sattelite table logging information about changes to
-the records in `variable`. */
-CREATE OR REPLACE TABLE `l_variable`
-(
-    `id_l_variable` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_variable` INTEGER REFERENCES `variable` (`id_variable`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
-);
-
-
-
 /* Sometimes variables can be corresponding with other variables.
 Like the liquids temperature with a pH-value. */
 CREATE OR REPLACE TABLE `j_variable_variable`
@@ -73,29 +50,6 @@ CREATE OR REPLACE TABLE `j_variable_variable`
   , `description` VARCHAR(50)
   	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
-);
-
-
-
-/* A sattelite table logging information about changes to
-the records in `j_variable_variable`. */
-CREATE OR REPLACE TABLE `l_j_variable_variable`
-(
-    `id_l_j_variable_variable` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_j_variable_variable` INTEGER REFERENCES `j_variable_variable` (`id_j_variable_variable`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
 );
 
 
@@ -117,29 +71,6 @@ CREATE OR REPLACE TABLE `j_action_variable`
   , `calculation` VARCHAR(40)
 	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
-);
-
-
-
-/* A sattelite table logging information about changes to
-the records in `j_action_variable`. */
-CREATE OR REPLACE TABLE `l_j_action_variable`
-(
-    `id_l_j_action_variable` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_j_action_variable` INTEGER REFERENCES `j_action_variable` (`id_j_action_variable`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
 );
 
 
@@ -201,58 +132,12 @@ CREATE OR REPLACE TABLE `value`
 
 
 
-/* A sattelite table logging information about changes to
-the records in `value`. */
-CREATE OR REPLACE TABLE `l_value`
-(
-    `id_l_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_value` INTEGER REFERENCES `value` (`id_value`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
-);
-
-
-
 /* Just as two variables can belong together, their values can do so too. */
 CREATE OR REPLACE TABLE `j_value_value`
 (
     `id_j_value_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `id_value1` INTEGER NOT NULL REFERENCES `value` (`id_value`)
   , `id_value2` INTEGER NOT NULL REFERENCES `value` (`id_value`)
-);
-
-
-
-/* A sattelite table logging information about changes to
-the records in `j_value_value`. */
-CREATE OR REPLACE TABLE `l_j_value_value`
-(
-    `id_l_j_value_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_j_value_value` INTEGER REFERENCES `j_value_value` (`id_j_value_value`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
 );
 
 
@@ -300,27 +185,4 @@ CREATE OR REPLACE TABLE `raw_value`
     )
   	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE
-);
-
-
-
-/* A sattelite table logging information about changes to
-the records in `raw_value`. */
-CREATE OR REPLACE TABLE `l_raw_value`
-(
-    `id_l_raw_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_raw_value` INTEGER REFERENCES `raw_value` (`id_raw_value`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
 );

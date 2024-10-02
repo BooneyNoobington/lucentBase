@@ -24,29 +24,6 @@ CREATE OR REPLACE TABLE `link`
 
 
 
-/* A sattelite table logging information about changes to
-the records in `link`. */
-CREATE OR REPLACE TABLE `l_link`
-(
-    `id_l_link` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_link` INTEGER REFERENCES `link` (`id_link`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
-);
-
-
-
 /* Standard operating procedures (sop) are special documents that describe
 the way actions and procedures are performed in an analytical environment.
 Depending on how a lab organizes these instructions. They can be a link to
@@ -62,29 +39,6 @@ CREATE OR REPLACE TABLE `sop`
 
 
 
-/* A sattelite table logging information about changes to
-the records in `sop`. */
-CREATE OR REPLACE TABLE `l_sop`
-(
-    `id_l_sop` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_sop` INTEGER REFERENCES `sop` (`id_sop`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
-);
-
-
-
 /* Create a join between `link` `sop`. */
 CREATE OR REPLACE TABLE `j_sop_link`
 (
@@ -93,29 +47,6 @@ CREATE OR REPLACE TABLE `j_sop_link`
   , `id_link` INTEGER NOT NULL REFERENCES `link` (`id_link`)
     -- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
-);
-
-
-
-/* A sattelite table logging information about changes to
-the records in `j_sop_link`. */
-CREATE OR REPLACE TABLE `l_j_sop_link`
-(
-    `id_l_j_sop_link` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_j_sop_link` INTEGER REFERENCES `j_sop_link` (`id_j_sop_link`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
 );
 
 
@@ -133,29 +64,6 @@ CREATE OR REPLACE TABLE `j_sop_person`
   , CONSTRAINT `id_sop_id_person_role_unique` UNIQUE(`id_sop`, `id_person`, `role`)
 	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE
-);
-
-
-
-/* A sattelite table logging information about changes to
-the records in `j_sop_person`. */
-CREATE OR REPLACE TABLE `l_j_sop_person`
-(
-    `id_l_j_sop_person` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_j_sop_person` INTEGER REFERENCES `j_sop_person` (`id_j_sop_person`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
 );
 
 
@@ -178,34 +86,11 @@ CREATE OR REPLACE TABLE `action`
 
 
 
-/* A sattelite table logging information about changes to
-the records in `action`. */
-CREATE OR REPLACE TABLE `l_action`
-(
-    `id_l_action` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_action` INTEGER REFERENCES `action` (`id_action`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
-);
-
-
-
 /* Actions depend on one another. This table organizes this dependecies. */
 CREATE OR REPLACE TABLE `j_action_dependency`
 (
     -- primary key.
-    `id_action_action` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    `id_j_action_dependency` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
     -- Which action depends on which other action.
   , `id_dependant` INTEGER NOT NULL REFERENCES `action` (`id_action`)
   , `id_dependency` INTEGER NOT NULL REFERENCES `action` (`id_action`)
@@ -219,29 +104,6 @@ CREATE OR REPLACE TABLE `j_action_dependency`
   , CONSTRAINT `id_action_id_action_unique` UNIQUE(`id_dependant`, `id_dependency`)
 	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
-);
-
-
-
-/* A sattelite table logging information about changes to
-the records in `j_action_dependency`. */
-CREATE OR REPLACE TABLE `l_j_action_dependency`
-(
-    `id_l_j_action_dependency` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_j_action_dependency` INTEGER REFERENCES `j_action_dependency` (`id_j_action_dependency`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
 );
 
 
@@ -263,33 +125,10 @@ CREATE OR REPLACE TABLE `j_action_implication`
 
 
 
-/* A sattelite table logging information about changes to
-the records in `j_action_implication`. */
-CREATE OR REPLACE TABLE `l_j_action_implication`
-(
-    `id_l_j_action_implication` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_j_action_implication` INTEGER REFERENCES `j_action_implication` (`id_j_action_implication`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
-);
-
-
-
 /* Just like an sop has a connection to people, actions have these too. */
 CREATE OR REPLACE TABLE `j_action_person`
 (
-    `id_action_person` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    `id_j_action_person` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
     -- What action is performed by which individual?
   , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
   , `id_person` INTEGER NOT NULL REFERENCES `person` (`id_person`)
@@ -304,33 +143,10 @@ CREATE OR REPLACE TABLE `j_action_person`
 
 
 
-/* A sattelite table logging information about changes to
-the records in `j_action_person`. */
-CREATE OR REPLACE TABLE `l_j_action_person`
-(
-    `id_l_j_action_person` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_j_action_person` INTEGER REFERENCES `j_action_person` (`id_j_action_person`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
-);
-
-
-
 /* Same goes for a specific collectionclass. */
 CREATE OR REPLACE TABLE `j_action_collection_class`
 (
-    `id_action_collection_class` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    `id_j_action_collection_class` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
   , `id_collection_class` INTEGER NOT NULL REFERENCES `collection_class` (`id_collection_class`)
   -- Avoind redundant connections.
@@ -341,58 +157,12 @@ CREATE OR REPLACE TABLE `j_action_collection_class`
 
 
 
-/* A sattelite table logging information about changes to
-the records in `j_action_collection_class`. */
-CREATE OR REPLACE TABLE `l_j_action_collection_class`
-(
-    `id_l_j_action_collection_class` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_j_action_collection_class` INTEGER REFERENCES `j_action_collection_class` (`id_j_action_collection_class`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
-);
-
-
-
 /* Connect actions and devices used to perform them. */
 CREATE OR REPLACE TABLE `j_action_device`
 (
-    `id_action_device` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    `id_j_action_device` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
   , `id_device` INTEGER NOT NULL REFERENCES `device` (`id_device`)
   	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE    
-);
-
-
-
-/* A sattelite table logging information about changes to
-the records in `j_action_device`. */
-CREATE OR REPLACE TABLE `l_j_action_device`
-(
-    `id_l_j_action_device` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_j_action_device` INTEGER REFERENCES `j_action_device` (`id_j_action_device`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
 );

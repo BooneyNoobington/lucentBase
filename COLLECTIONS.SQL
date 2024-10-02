@@ -25,26 +25,3 @@ CREATE OR REPLACE TABLE `collection`
   	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE    
 );
-
-
-
-/* A sattelite table logging information about changes to
-the records in `collection`. */
-CREATE OR REPLACE TABLE `l_collection`
-(
-    `id_l_collection` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-    -- Relate an entry to a record in the main table.
-  , `id_collection` INTEGER REFERENCES `collection` (`id_collection`)
-    -- What kind of change happened to the record? Update, Insert, deletion, ...?
-  , `change` VARCHAR(50) NOT NULL
-    -- When did the change occur?
-  , `t` DATETIME NOT NULL
-    -- Who performed the change?
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-    -- Any additional information?
-  , `note` VARCHAR(500)
-    -- How did the record look before?
-    -- Every time a record is changed, this sum should be computable
-    -- of all the columns of the specific record. in the main table.
-  , `checksum` VARCHAR(100) NOT NULL
-);
