@@ -63,6 +63,9 @@ SOURCE VARIABLES_AND_VALUES.SQL
 -- Log tables for every other table.
 SOURCE LOG_TABLES.SQL
 
+-- Inital records
+SOURCE INITIAL_DATA.SQL
+
 -- Now that smaller clusters of tables are prepared, they
 -- can be connected in a global fashion.
 -- TODO: Might be unneccesary. SOURCE GLOBAL_CONNECTION.SQL
