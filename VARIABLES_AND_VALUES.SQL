@@ -79,12 +79,15 @@ CREATE OR REPLACE TABLE `j_action_variable`
 Most prominently measurement results. But it can be a lot of things, like a confirmation
 that a sample has been disposed of.
 Also many different data types for the value itself are possbible. Decimal for measurement
-results, booleans for a status, text for a description, an rgb value, and so on. */
-CREATE OR REPLACE TABLE `value`
+results, booleans for a status, text for a description, an rgb value, and so on.
+
+Most importantly, values are the link between a collection
+and actions performed on them. */
+CREATE OR REPLACE TABLE `j_collection_value`
 (
-    `id_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+    `id_j_collection_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
     -- To which collection do these values belong to?
-    -- This asosciation is created automatically when a lifecycle is attached to a collection.
+    -- This asosciation is created automatically when a group of actions is attached to a collection.
     -- The corresponding variables are stored here.
   , `id_collection` INTEGER NOT NULL REFERENCES `collection` (`id_collection`)
     -- What variables are to be provided with values?
@@ -93,68 +96,27 @@ CREATE OR REPLACE TABLE `value`
     -- A value can be measured multiple times. Not to be confused with raw values
     -- that are repeatadly measured to increase precision.
     -- More like repeated measurements for time series.
-  , `repetition` INTEGER DEFAULT 0
-	-- A repetition can be done for a number of reasons.
-    -- For instance if the first result of a measurement was produced
-    -- without an obvious error but still is unplausibel.
-    -- Or because remeasuring is to be exptected. E.g. in a time series.
-    -- The actual value.
-  , `repetition_class` VARCHAR(20) CHECK (`repetition_class` IN ('time series', 'remeasuring'))
 
-    -- The actual value.
-  , `decimal_value` DECIMAL
-  , `text_value` VARCHAR(50)
-  , `boolean_value` BOOLEAN
-  , `datetime_value` DATETIME
-
-  -- Someone has to accept all entered values.
-  , `accepted` BOOLEAN NOT NULL DEFAULT FALSE
-  -- Make sure that at most one of the value columns is filled.
-  , CONSTRAINT `one_entry_for_value_only` CHECK(  -- YUCK YUCK YUCK
-      -- No entry in any of the value columns is allowed.
-      (`decimal_value` IS NULL AND `text_value` IS NULL AND `boolean_value` IS NULL AND `datetime_value` IS NULL)
-      OR
-      (`decimal_value` IS NOT NULL AND `text_value` IS NULL AND `boolean_value` IS NULL AND `datetime_value` IS NULL)
-      OR
-      (`decimal_value` IS NULL AND `text_value` IS NOT NULL AND `boolean_value` IS NULL AND `datetime_value` IS NULL)
-      OR
-      (`decimal_value` IS NULL AND `text_value` IS NULL AND `boolean_value` IS NOT NULL AND `datetime_value` IS NULL)
-      OR
-      (`decimal_value` IS NULL AND `text_value` IS NULL AND `boolean_value` IS NULL AND `datetime_value` IS NOT NULL)
-    )
   -- Make sure that a collection can hold each value only one time.
   , CONSTRAINT `id_collection_id_j_variable_unqiue` UNIQUE(
-      `id_collection`, `id_j_action_variable`, `repetition`
+      `id_collection`, `id_j_action_variable`
     )
   	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE      
 );
 
-
-
-/* Just as two variables can belong together, their values can do so too. */
-CREATE OR REPLACE TABLE `j_value_value`
-(
-    `id_j_value_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  , `id_value1` INTEGER NOT NULL REFERENCES `value` (`id_value`)
-  , `id_value2` INTEGER NOT NULL REFERENCES `value` (`id_value`)
-);
-
-
-
-/* Raw values come directly from entry or an entry or an import file. */
-/* The second heart of lucent are values that are attributed to specific variables.
-Most prominently measurement results. But it can be a lot of things, like a confirmation
-that a sample has been disposed of.
-Also many different data types for the value itself are possbible. Decimal for measurement
-results, booleans for a status, text for a description, an rgb value, and so on. */
+/* As seen above, the link between collections and values don't hold any actual
+measurement results. These are provided by the respective raw values
+as well as the `result` table which describes how end results are computed. */
 CREATE OR REPLACE TABLE `raw_value`
 (
     `id_raw_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
     -- A value can always be traced back to one or more raw values.
-  , `id_value` INTEGER REFERENCES `value` (`id_value`)
+  , `id_j_collection_value` INTEGER REFERENCES `j_collection_value` (`id_j_collection_value`)
     -- When was this raw value generated?
-  , `t` DATETIME NOT NULL
+    -- TODO: Can be null when the value itself `datetime_value` is already
+    -- a date time
+  , `t` DATETIME
     -- Who generated the value?
   , `id_person` INTEGER REFERENCES `person` (`id_person`)
     -- On which device was the value generated on?
@@ -185,4 +147,29 @@ CREATE OR REPLACE TABLE `raw_value`
     )
   	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+
+/* Just as two variables can belong together, their values can do so too. */
+CREATE OR REPLACE TABLE `j_value_value`
+(
+    `id_j_value_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+  , `id_value1` INTEGER NOT NULL REFERENCES `j_collection_value` (`id_j_collection_value`)
+  , `id_value2` INTEGER NOT NULL REFERENCES `j_collection_value` (`id_j_collection_value`)
+);
+
+
+/* Finaly results are not stored seperately to avoid update artifacts and
+also avoid the need for complex triggers.
+This table holds information about how to calculate an end result for a
+specific value. */
+CREATE OR REPLACE TABLE `result`
+(
+    `id_result` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+  , `name` VARCHAR(20) UNIQUE NOT NULL
+  , `id_j_collection_value` INTEGER NOT NULL REFERENCES `j_collection_value` (`id_j_collection_value`)
+    -- Name of a function that takes id_j_collection_value as input
+    -- collects all associated raw values and performs an arbitrary
+    -- function on them
+  , `calculation` VARCHAR(30) UNIQUE NOT NULL DEFAULT 'getMeanGeneric'
 );

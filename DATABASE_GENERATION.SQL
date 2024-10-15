@@ -56,7 +56,6 @@ SOURCE ACTIONS_AND_LIFECYCLES.SQL;
 -- Second heart of lucent. Collections.
 SOURCE COLLECTIONS.SQL
 
--- The actual numbers and other infobits produced by
 -- actions and belonging in their respective colletions.
 SOURCE VARIABLES_AND_VALUES.SQL
 

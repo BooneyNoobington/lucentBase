@@ -442,10 +442,10 @@ CREATE OR REPLACE TABLE `l_j_action_variable`
 
 /* A sattelite table logging information about changes to
 the records in `value`. */
-CREATE OR REPLACE TABLE `l_value`
+CREATE OR REPLACE TABLE `l_j_collection_value`
 (
-    `id_l_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  , `id_value` INTEGER REFERENCES `value` (`id_value`)
+    `id_l_j_collection_value` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+  , `id_j_collection_value` INTEGER REFERENCES `j_collection_value` (`id_j_collection_value`)
   , `change` VARCHAR(50) NOT NULL
   , `t` DATETIME NOT NULL
   , `id_editor` INTEGER REFERENCES `person` (`id_person`)
