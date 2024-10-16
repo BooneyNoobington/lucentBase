@@ -1,0 +1,75 @@
+---
+organization:
+    new1:
+        name: Eevog
+        connection: device manufacturer
+    new2:
+        name: YouCom Inc.
+        shorthand: we
+    new4:
+        name: Weyland Yutani
+        shorthand: WeyYu
+        connection: device manufacturer
+        
+action:
+    new1:
+        name: get automatic air readings
+        iteration: 2024-06-01
+        active: 1
+        description: Use a continuously measuring probe to take various air readings.
+    new2:
+        name: get manual air readings
+        iteration: 2024-12-01
+        active: 1
+        description: Use a handheld device to measure humidty and temperature.
+    new3:
+        name: install probe
+        iteration: 2024-06-01
+        active: 1
+        description: Install a probe and record everything noteworthy about the process.
+        
+unit:
+    new1:
+        name: "1"
+        description: no physical unit (for values such as percentages or pH)
+    new2:
+        name: second
+    new3:
+        name: meter
+    new4:
+        name: kilogramm
+    new5:
+        name: electric current
+    new6:
+        name: luminous intensity
+    new7:
+        name: ampere
+    new8:
+        name: kelvin
+    new9:
+        name: mole
+    new10:
+        name: candela
+
+city:
+    new1:
+        name: Karlsruhe
+    new2:
+        name: Freiburg
+    new3:
+        name: New York
+    new4:
+        name: Duala
+        
+crs:
+    new1:
+        name: WGS 84
+        epsg: 4326
+        description: World Geodetic System 1984
+    new2:
+        name: Web Mercator
+        epsg: 3857
+    new3:
+        name: Gauss-Krüger Zone 1
+        epsg: 31466
+---
