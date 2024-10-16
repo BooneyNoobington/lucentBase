@@ -106,21 +106,6 @@ CREATE OR REPLACE TABLE `j_action_person`
 );
 
 
-
-/* Same goes for a specific collectionclass. */
-CREATE OR REPLACE TABLE `j_action_collection_class`
-(
-    `id_j_action_collection_class` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
-  , `id_collection_class` INTEGER NOT NULL REFERENCES `collection_class` (`id_collection_class`)
-  -- Avoind redundant connections.
-  , CONSTRAINT `id_action_id_collection_class_unqiue` UNIQUE(`id_action`, `id_collection_class`)
-  	-- Recycle bin.
-  , `vis` BOOLEAN NOT NULL DEFAULT TRUE    
-);
-
-
-
 /* Connect actions and devices used to perform them. */
 CREATE OR REPLACE TABLE `j_action_device`
 (
