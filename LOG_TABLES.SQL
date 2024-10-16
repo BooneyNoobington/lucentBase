@@ -11,25 +11,13 @@ CREATE OR REPLACE TABLE `l_link`
   , `checksum` VARCHAR(100) NOT NULL
 );
 
-/* A sattelite table logging information about changes to
-the records in `sop`. */
-CREATE OR REPLACE TABLE `l_sop`
-(
-    `id_l_sop` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  , `id_sop` INTEGER REFERENCES `sop` (`id_sop`)
-  , `change` VARCHAR(50) NOT NULL
-  , `t` DATETIME NOT NULL
-  , `id_editor` INTEGER REFERENCES `person` (`id_person`)
-  , `note` VARCHAR(500)
-  , `checksum` VARCHAR(100) NOT NULL
-);
 
 /* A sattelite table logging information about changes to
 the records in `j_sop_link`. */
-CREATE OR REPLACE TABLE `l_j_sop_link`
+CREATE OR REPLACE TABLE `l_j_action_link`
 (
-    `id_l_j_sop_link` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  , `id_j_sop_link` INTEGER REFERENCES `j_sop_link` (`id_j_sop_link`)
+    `id_l_j_action_link` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
+  , `id_j_acion_link` INTEGER REFERENCES `j_action_link` (`id_j_action_link`)
   , `change` VARCHAR(50) NOT NULL
   , `t` DATETIME NOT NULL
   , `id_editor` INTEGER REFERENCES `person` (`id_person`)

@@ -23,17 +23,6 @@ CREATE OR REPLACE TABLE `link`
 );
 
 
-/* Create a join between `action` and `link`. */
-CREATE OR REPLACE TABLE `j_action_link`
-(
-    `id_j_action_link` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT
-  , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
-  , `id_link` INTEGER NOT NULL REFERENCES `link` (`id_link`)
-    -- Recycle bin.
-  , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
-);
-
-
 /* One of two hearts of lucentLIMS. There are objects of interets (often called "samples")
 and something that happens with them. Actions. */
 CREATE OR REPLACE TABLE `action`
@@ -49,6 +38,16 @@ CREATE OR REPLACE TABLE `action`
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+
+/* Create a join between `action` and `link`. */
+CREATE OR REPLACE TABLE `j_action_link`
+(
+    `id_j_action_link` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT
+  , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
+  , `id_link` INTEGER NOT NULL REFERENCES `link` (`id_link`)
+    -- Recycle bin.
+  , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
+);
 
 
 /* Actions depend on one another. This table organizes this dependecies. */
