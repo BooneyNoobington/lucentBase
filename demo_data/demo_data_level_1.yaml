@@ -15,7 +15,7 @@ spot:
 
 collection:
     new1:
-        name: {getNextIdentifier}
+        name: {getNextIdentifier()}
         id_matrix: {idByList(list(name = 'outside air'), 'matrix')}
         collection_class: 'time series'
         id_spot: {idByList(list(name = 'garde 1'), 'spot')}
