@@ -12,7 +12,7 @@ CREATE OR REPLACE TABLE `collection`
   , `id_matrix` INTEGER NOT NULL REFERENCES `matrix` (`id_matrix`)
   	-- If you take a water sample from your tab, the collection would be a sample and
   	-- the object "water from a tab". This can be taken as a spot sample or collected over time.
-  , `id_collection_class` INTEGER NOT NULL REFERENCES `collection_class` (`id_collection_class`)
+  , `collection_class` VARCHAR(50) NOT NULL
   	-- Where did this collection originate from.
   , `id_spot` INTEGER REFERENCES `spot` (`id_spot`)
   , `id_site` INTEGER REFERENCES `site` (`id_site`)
@@ -21,6 +21,17 @@ CREATE OR REPLACE TABLE `collection`
         `id_spot` IS NULL AND `id_site` IS NOT NULL  -- Site was specified.
         OR
         `id_spot` IS NOT NULL AND `id_site` IS NULL  -- Spot was specidied.
+    )
+    -- Make sure collection classes are taken from a robust set of choices
+  , CONSTRAINT `collection_class_choices` CHECK(
+        `collection_class` IN (
+            'spot sample'
+          , 'mixed sample'
+          , 'collective sample'
+          , 'time_series'
+          , 'free measurement'
+            -- append as needed
+        )
     )
   	-- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE    
