@@ -43,7 +43,6 @@ CREATE OR REPLACE TABLE `action`
   , `iteration` DATETIME NOT NULL  -- Versioning.
   , `active` BOOLEAN NOT NULL  -- Is this action ready / permitted to be performed?
   , `description` VARCHAR(250)  -- A short description of what this action does.
-  , `id_sop` INTEGER REFERENCES `sop` (`id_sop`)  -- How to do it is explained in sop.
     -- Name (or version) alone don't have to be unique but in combination they are.
   , CONSTRAINT `action_name_iterartion_unique` UNIQUE(`name`, `iteration`)
 	-- Recycle bin.
