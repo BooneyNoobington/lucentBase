@@ -27,7 +27,15 @@ action:
         iteration: 2024-06-01
         active: 1
         description: Install a probe and record everything noteworthy about the process.
-        
+
+matrix:
+    new1:
+        name: outside air
+        description: air with a significant exchange rate (outdoors)
+    new2:
+        name: indoor air
+        description: air inside a buildung or similar (low exchange rate)
+
 unit:
     new1:
         name: "1"
