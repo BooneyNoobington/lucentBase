@@ -78,19 +78,6 @@ CREATE OR REPLACE TABLE `l_j_action_person`
 );
 
 /* A sattelite table logging information about changes to
-the records in `j_action_collection_class`. */
-CREATE OR REPLACE TABLE `l_j_action_collection_class`
-(
-    `id_l_j_action_collection_class` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  , `id_j_action_collection_class` INTEGER REFERENCES `j_action_collection_class` (`id_j_action_collection_class`)
-  , `change` VARCHAR(50) NOT NULL
-  , `t` DATETIME NOT NULL
-  , `id_editor` INTEGER REFERENCES `person` (`id_person`)
-  , `note` VARCHAR(500)
-  , `checksum` VARCHAR(100) NOT NULL
-);
-
-/* A sattelite table logging information about changes to
 the records in `j_action_device`. */
 CREATE OR REPLACE TABLE `l_j_action_device`
 (
