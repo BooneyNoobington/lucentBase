@@ -23,49 +23,15 @@ CREATE OR REPLACE TABLE `link`
 );
 
 
-
-/* Standard operating procedures (sop) are special documents that describe
-the way actions and procedures are performed in an analytical environment.
-Depending on how a lab organizes these instructions. They can be a link to
-a website or a file.*/
-CREATE OR REPLACE TABLE `sop`
+/* Create a join between `action` and `link`. */
+CREATE OR REPLACE TABLE `j_action_link`
 (
-    `id_sop` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT
-  , `name` VARCHAR(40) UNIQUE NOT NULL
-  , `active` BOOLEAN NOT NULL DEFAULT FALSE
-    -- Recycle bin.
-  , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
-);
-
-
-
-/* Create a join between `link` `sop`. */
-CREATE OR REPLACE TABLE `j_sop_link`
-(
-    `id_j_sop_link` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT
-  , `id_sop` INTEGER NOT NULL REFERENCES `sop` (`id_sop`)
+    `id_j_action_link` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT
+  , `id_action` INTEGER NOT NULL REFERENCES `action` (`id_action`)
   , `id_link` INTEGER NOT NULL REFERENCES `link` (`id_link`)
     -- Recycle bin.
   , `vis` BOOLEAN NOT NULL DEFAULT TRUE  
 );
-
-
-
-/* Connect people with a standard operation procedure and
-explain what their role in regards of the sop are. */
-CREATE OR REPLACE TABLE `j_sop_person`
-(
-    `id_j_sop_person` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT
-  , `id_sop` INTEGER REFERENCES `sop` (`id_sop`)
-  , `id_person` INTEGER REFERENCES `person` (`id_person`)
-	-- A person has a specific job regarding an sop.
-  , `role` VARCHAR(40) NOT NULL CHECK (`role` IN ('author', 'responsible', 'releaser'))
-	-- Make sure that the combination of an sop, a person and a specified role are unique.
-  , CONSTRAINT `id_sop_id_person_role_unique` UNIQUE(`id_sop`, `id_person`, `role`)
-	-- Recycle bin.
-  , `vis` BOOLEAN NOT NULL DEFAULT TRUE
-);
-
 
 
 /* One of two hearts of lucentLIMS. There are objects of interets (often called "samples")

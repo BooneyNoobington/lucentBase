@@ -1,0 +1,10 @@
+---
+# Insert further demo data that contains foreign keys to other tables,
+# linking additional records.
+person:
+    new1:
+        given_name: Harry
+        surname: Kim
+        unix_account: ensign4ever
+        id_organization: {idByList(list(shorthand = 'we'), 'organization')}
+---

@@ -16,7 +16,7 @@ CREATE OR REPLACE TABLE `unit`
 (
     `id_unit` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   , `name` VARCHAR(40) NOT NULL UNIQUE
-  , `description` VARCHAR(50)
+  , `description` VARCHAR(100)
     -- Foreign key: dimension.
   , `id_dimension` INTEGER REFERENCES `dimension` (`id_dimension`)
     -- Recycle bin.
