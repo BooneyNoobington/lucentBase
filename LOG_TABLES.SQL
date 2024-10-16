@@ -116,18 +116,6 @@ CREATE OR REPLACE TABLE `l_matrix`
   , `checksum` VARCHAR(100) NOT NULL
 );
 
-/* A sattelite table logging information about changes to
-the records in `collection_class`. */
-CREATE OR REPLACE TABLE `l_collection_class`
-(
-    `id_l_collection_class` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
-  , `id_collection_class` INTEGER REFERENCES `collection_class` (`id_collection_class`)
-  , `change` VARCHAR(50) NOT NULL
-  , `t` DATETIME NOT NULL
-  , `id_editor` INTEGER REFERENCES `person` (`id_person`)
-  , `note` VARCHAR(500)
-  , `checksum` VARCHAR(100) NOT NULL
-);
 
 /* A sattelite table logging information about changes to
 the records in `collection`. */
