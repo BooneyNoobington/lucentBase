@@ -28,7 +28,7 @@ CREATE OR REPLACE TABLE `collection`
             'spot sample'
           , 'mixed sample'
           , 'collective sample'
-          , 'time_series'
+          , 'time series'
           , 'free measurement'
             -- append as needed
         )
