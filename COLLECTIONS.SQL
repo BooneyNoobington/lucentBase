@@ -7,7 +7,7 @@ CREATE OR REPLACE TABLE `collection`
     `id_collection` INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT
   	-- The "name" of a collection should not be chosen by the user but rather follow
   	-- a specific counting mechanism.
-  , `name` VARCHAR(40) UNIQUE NOT NULL
+  , `name` VARCHAR(40) UNIQUE
   	-- Of which object is this collection an instance of? Or, of what was this sample taken?
   , `id_matrix` INTEGER NOT NULL REFERENCES `matrix` (`id_matrix`)
   	-- If you take a water sample from your tab, the collection would be a sample and

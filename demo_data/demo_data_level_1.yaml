@@ -18,12 +18,10 @@ spot:
 
 collection:
     new1:
-        name: {getNextCustomEnum(db_conn = db.conn, enum_list=sys.cnf$enumeration, current_max = getMaxCustomEnum(db_conn = db.conn))}
         id_matrix: {idByList(db.conn = db.conn, l = list(name = 'outside air'), tab = 'matrix')}
         collection_class: 'time series'
         id_spot: {idByList(db.conn = db.conn, l = list(name = 'garden 1'), tab = 'spot')}
     new2:
-        name: {paste(getNextCustomEnum(db_conn = db.conn, enum_list=sys.cnf$enumeration, current_max = getMaxCustomEnum(db_conn = db.conn)))}
         id_matrix: {idByList(db.conn = db.conn, l = list(name = 'indoor air'), tab = 'matrix')}
         collection_class: 'time series'
         id_spot: {idByList(db.conn = db.conn, l = list(name = 'childrens room 1'), tab = 'spot')}
