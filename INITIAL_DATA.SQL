@@ -3,7 +3,7 @@ database creation. */
 
 -- The initial "lucent" user / admin
 INSERT INTO `person` (`given_name`, `surname`, `unix_account`)
-VALUES('Testi', 'Testo', 'lucent');
+VALUES('System', 'User', 'lucent');
 
 -- Your company, adapt accordingly
 INSERT INTO `organization` (`name`, `shorthand`)

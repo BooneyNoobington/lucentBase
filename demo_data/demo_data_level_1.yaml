@@ -6,7 +6,7 @@ person:
         given_name: Harry
         surname: Kim
         unix_account: ensign4ever
-        id_organization: {idByList(list(shorthand = 'we'), 'organization')}
+        id_organization: {idByList(db.conn = db.conn, l = list(shorthand = 'we'), tab = 'organization')}
 
 spot:
     new1:
@@ -18,13 +18,13 @@ spot:
 
 collection:
     new1:
-        name: {paste(getNextIdentifier(), collapse = '-')}
-        id_matrix: {idByList(list(name = 'outside air'), 'matrix')}
+        name: {getNextCustomEnum(db_conn = db.conn, enum_list=sys.cnf$enumeration, current_max = getMaxCustomEnum(db_conn = db.conn))}
+        id_matrix: {idByList(db.conn = db.conn, l = list(name = 'outside air'), tab = 'matrix')}
         collection_class: 'time series'
-        id_spot: {idByList(list(name = 'garden 1'), 'spot')}
+        id_spot: {idByList(db.conn = db.conn, l = list(name = 'garden 1'), tab = 'spot')}
     new2:
-        name: {paste(getNextIdentifier(), collapse = '-')}
-        id_matrix: {idByList(list(name = 'indoor air'), 'matrix')}
+        name: {paste(getNextCustomEnum(db_conn = db.conn, enum_list=sys.cnf$enumeration, current_max = getMaxCustomEnum(db_conn = db.conn)))}
+        id_matrix: {idByList(db.conn = db.conn, l = list(name = 'indoor air'), tab = 'matrix')}
         collection_class: 'time series'
-        id_spot: {idByList(list(name = 'childrens room 1'), 'spot')}
+        id_spot: {idByList(db.conn = db.conn, l = list(name = 'childrens room 1'), tab = 'spot')}
 ---
