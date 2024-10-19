@@ -17,7 +17,7 @@ CREATE OR REPLACE TABLE `segment_digit`
     `id_segment_digit` INTEGER PRIMARY KEY UNIQUE NOT NULL,
     `id_encoding_segment` INTEGER NOT NULL REFERENCING `encoding_segment` (`id_encoding_segment),
     -- The substitution (encoding) for a digit. Like "red" for 1.
-    `digit` VARCHAR(15) NOT NULL,
+    `digit` VARCHAR(15) NOT NULL
 );
 
 
