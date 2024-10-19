@@ -62,6 +62,10 @@ SOURCE VARIABLES_AND_VALUES.SQL
 -- Log tables for every other table.
 SOURCE LOG_TABLES.SQL
 
+
+-- Hard coded configuration like rules for integer encoding
+SOURCE CONFIG.SQL
+
 -- Inital records
 SOURCE INITIAL_DATA.SQL
 
