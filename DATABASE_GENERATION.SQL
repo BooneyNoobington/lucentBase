@@ -17,12 +17,12 @@ DROP DATABASE IF EXISTS lucent;
 CREATE OR REPLACE DATABASE lucent CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 /* Inital user generation. */
 -- TODO: Check wether this is safe to do. Usually the socket is read-writable for everyone
-CREATE OR REPLACE USER {linux_user}@'localhost' IDENTIFIED VIA unix_socket;
+CREATE OR REPLACE USER $linux_user@'localhost' IDENTIFIED VIA unix_socket;
 -- Only neccessary if SQL_MODE does not have NO_AUTO_CREATE_USER set
 -- The table "lucent" can be used by the user of the same name
-GRANT USAGE ON lucent.* TO {linux_user}@'localhost' IDENTIFIED VIA unix_socket;
+GRANT USAGE ON lucent.* TO $linux_user@'localhost' IDENTIFIED VIA unix_socket;
 -- Allow all actions on this databnase to user "lucent".
-GRANT ALL PRIVILEGES ON lucent.* TO {linux_user}@'localhost' IDENTIFIED VIA unix_socket;
+GRANT ALL PRIVILEGES ON lucent.* TO $linux_user@'localhost' IDENTIFIED VIA unix_socket;
 -- Update the RDBMS to the recent access permissions
 FLUSH PRIVILEGES;
 

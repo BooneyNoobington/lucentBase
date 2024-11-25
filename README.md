@@ -7,5 +7,5 @@ The MariaDB database that underlies lucentLIMS.
 
 
 # Installation
-Execute this command as root user. In the example, sudo is used to achieve that.
-`sed "s/$USER/$linux_user/g" your_script.sql | sudo mysql`
+Execute this command as root user inside the project directory. In the example, sudo is used to achieve that.
+`sed "s/$USER/$linux_user/g" DATABASE_GENERATION | sudo mysql`
