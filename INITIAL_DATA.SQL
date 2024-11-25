@@ -2,15 +2,15 @@
 database creation. */
 
 -- The initial "lucent" user / admin
-INSERT INTO `person` (`given_name`, `surname`, `unix_account`)
-VALUES('Testi', 'Testo', 'lucent');
+INSERT INTO person (given_name, surname, linux_user)
+VALUES('System', 'User', 'grindel');
 
 -- Your company, adapt accordingly
-INSERT INTO `organization` (`name`, `shorthand`)
+INSERT INTO organization (name, shorthand)
 VALUES('Redhsoft.org', 'redhsoft');
 
 -- Link lucent to your company
-UPDATE `person`SET `id_organization` = (
-  SELECT `id_organization` FROM `organization` WHERE `name` = 'Redhsoft.org'
+UPDATE personSET id_organization = (
+    SELECT id_organization FROM organization WHERE name = 'Redhsoft.org'
 )
-WHERE `unix_account` = 'lucent';
+WHERE linux_user = 'grindel';
