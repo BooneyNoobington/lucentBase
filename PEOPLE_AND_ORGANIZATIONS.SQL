@@ -34,7 +34,7 @@ CREATE OR REPLACE TABLE j_person_house
     id_house INTEGER REFERENCES house (id_house),
     address_class VARCHAR(20),  -- Different addresses are possible. Home, work, etc.
 	-- Recycle bin
-    vis BOOLEAN NOT NULL DEFAULT TRUE,
+    vis BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 

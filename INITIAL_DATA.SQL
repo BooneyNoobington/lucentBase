@@ -10,7 +10,7 @@ INSERT INTO organization (name, shorthand)
 VALUES('Redhsoft.org', 'redhsoft');
 
 -- Link lucent to your company
-UPDATE personSET id_organization = (
+UPDATE person SET id_organization = (
     SELECT id_organization FROM organization WHERE name = 'Redhsoft.org'
 )
 WHERE linux_user = 'grindel';

@@ -5,19 +5,11 @@ CREATE OR REPLACE TABLE link
 (
     id_link INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
     name VARCHAR(50) UNIQUE NOT NULL,
-    url VARCHAR(500),
+    URI VARCHAR(500),
     file_path VARCHAR(500),
     -- Every time "accepted" changes to TRUE, the app has to calculate the sha256 sum
     accepted BOOLEAN NOT NULL DEFAULT FALSE,
-    SHA256 VARCHAR(64)  -- Make sure the file wasn't tampered with
-     -- Make sure at least a file or an url is given
-     CONSTRAINT file_or_url CHECK (
-        -- Either a file path is given …
-        (file_path IS NOT NULL AND url IS NULL)
-        OR
-        -- … or a url, but never both.
-        (file_path IS NULL AND url IS NOT NULL)
-    ),
+    SHA256 VARCHAR(64),  -- Make sure the file wasn't tampered with
     -- Recycle bin.
     vis BOOLEAN NOT NULL DEFAULT TRUE
 );

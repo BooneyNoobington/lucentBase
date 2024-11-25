@@ -55,7 +55,7 @@ BEGIN
             CREATE TABLE IF NOT EXISTS ', log_table, ' (
                 id_l_', tbl_name, ' INT AUTO_INCREMENT PRIMARY KEY,
                 id_', tbl_name, ' INT NOT NULL,
-                change VARCHAR(50) NOT NULL,
+                modification VARCHAR(50) NOT NULL,
                 t TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 id_editor INT,
                 note VARCHAR(500),
@@ -93,7 +93,7 @@ BEGIN
             BEGIN
                 INSERT INTO ', log_table, ' (
                     id_', tbl_name, ',
-                    change,
+                    modification,
                     id_editor,
                     note,
                     checksum
@@ -118,7 +118,7 @@ BEGIN
             BEGIN
                 INSERT INTO ', log_table, ' (
                     id_', tbl_name, ',
-                    change,
+                    modification,
                     id_editor,
                     note,
                     checksum

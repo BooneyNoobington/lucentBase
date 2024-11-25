@@ -72,8 +72,13 @@ CREATE OR REPLACE TABLE effect
 
 /* Relate two effects. E.g. relative humidity makes sense in conjunction with
 air temperature */
-CREATE OR REPLACE TABLE j_effect_effect 
-
+CREATE OR REPLACE TABLE j_effect_effect
+(
+    id_j_effect_effect INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
+    id_effect INTEGER REFERENCES effect (id_effect),
+    id_coefficient INTEGER REFERENCES effect (id_effect),
+    description VARCHAR(250)
+);
 
 
 /* The second heart of lucent are values that are attributed to specific parameters.
@@ -95,18 +100,14 @@ CREATE OR REPLACE TABLE value
     -- What parameters are to be provided with values?
     -- From this reference we can derive the lifecycle, action and parameter
     id_effect INTEGER NOT NULL REFERENCES effect (id_effect),
-    -- A value can be measured multiple times. Not to be confused with raw values
-    -- that are repeatadly measured to increase precision
-    -- More like repeated measurements for time series
-
-    -- Make sure that a collection can hold each value only one time
-    CONSTRAINT id_collection_id_j_parameter_unqiue UNIQUE(
-      id_collection, id_effect
-    ),
     -- For measurement effects, define calculation
     calculation VARCHAR(30) DEFAULT 'getMeanGeneric',
   	-- Recycle bin
-    vis BOOLEAN NOT NULL DEFAULT TRUE      
+    vis BOOLEAN NOT NULL DEFAULT TRUE,
+    -- Make sure that a collection can hold each value only one time
+    CONSTRAINT collection_effect_unique UNIQUE(
+        id_collection, id_effect
+    )  
 );
 
 /* As seen above, the link between collections and values don't hold any actual
