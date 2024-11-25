@@ -50,7 +50,7 @@ SOURCE CLASSES.SQL
 SOURCE DEVICES.SQL
 
 -- Getting to the jist of it now. One of two hearts of lucent. The actions
-SOURCE ACTIONS_AND_LIFECYCLES.SQL;
+SOURCE ACTIONS.SQL;
 
 -- Second heart of lucent. Collections.
 SOURCE COLLECTIONS.SQL

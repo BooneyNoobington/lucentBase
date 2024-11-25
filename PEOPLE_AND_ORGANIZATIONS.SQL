@@ -3,7 +3,7 @@ of individuals. Mostly for categorization.*/
 CREATE OR REPLACE TABLE organization
 (
     id_organization INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(50) UNIQUE,
+    name VARCHAR(50) UNIQUE,
     shorthand VARCHAR(15),
     relation VARCHAR(25),  -- E.g. partner, client, …
 	-- Recycle bin
@@ -32,7 +32,7 @@ CREATE OR REPLACE TABLE j_person_house
     id_j_person_house INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
     id_person INTEGER REFERENCES person (id_person),
     id_house INTEGER REFERENCES house (id_house),
-    address_class VARCHAR(20)  -- Different addresses are possible. Home, work, etc.
+    address_class VARCHAR(20),  -- Different addresses are possible. Home, work, etc.
 	-- Recycle bin
     vis BOOLEAN NOT NULL DEFAULT TRUE,
 );
@@ -58,7 +58,7 @@ CREATE OR REPLACE TABLE j_person_organization
     id_j_person_organization INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
     id_person INTEGER REFERENCES person (id_person),
     id_organization INTEGER REFERENCES organization (id_organization),
-    position VARCHAR(20)  -- What is a person doing for a specific organization?
+    position VARCHAR(20),  -- What is a person doing for a specific organization?
 	-- Recycle bin
     vis BOOLEAN NOT NULL DEFAULT TRUE
 );

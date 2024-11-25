@@ -30,7 +30,7 @@ CREATE OR REPLACE TABLE message
     reciever VARCHAR(20) NOT NULL REFERENCES person (linux_user),
     subject VARCHAR(250) NOT NULL,
     message VARCHAR(500) NOT NULL,
-    read BOOLEAN NOT NULL DEFAULT 0,
+    new BOOLEAN NOT NULL DEFAULT TRUE,
     -- Recycle bin.
     vis BOOLEAN NOT NULL DEFAULT TRUE  
 );
