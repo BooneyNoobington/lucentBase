@@ -3,9 +3,9 @@ of individuals. Mostly for categorization.*/
 CREATE OR REPLACE TABLE organization
 (
     id_organization INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    name VARCHAR(50) UNIQUE,
+    `name` VARCHAR(50) UNIQUE,
     shorthand VARCHAR(15),
-    connection VARCHAR(25),  -- E.g. partner, client, …
+    relation VARCHAR(25),  -- E.g. partner, client, …
 	-- Recycle bin
     vis BOOLEAN NOT NULL DEFAULT TRUE
 );
