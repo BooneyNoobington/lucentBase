@@ -30,22 +30,6 @@ CREATE OR REPLACE TABLE parameter
 );
 
 
-
-/* Sometimes parameters can be corresponding with other parameters.
-Like the liquids temperature with a pH-value. */
-CREATE OR REPLACE TABLE j_parameter_parameter
-(
-	  id_j_parameter_parameter INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
-    id_parameter1 INTEGER REFERENCES parameter (id_parameter),
-    id_parameter2 INTEGER REFERENCES parameter (id_parameter),
-    -- A short explaination why the two parameters are connected together
-    description VARCHAR(50),
-  	-- Recycle bin
-    vis BOOLEAN NOT NULL DEFAULT TRUE  
-);
-
-
-
 /* Relate an action and a parameter. */
 CREATE OR REPLACE TABLE effect
 (
@@ -63,7 +47,7 @@ CREATE OR REPLACE TABLE effect
     uncertainty_class VARCHAR(9),
 	  -- In which unit is the uncertainty provided?
     uncertainty_id_unit INTEGER REFERENCES unit (id_unit),
-	  -- How is the corresponding end effect calculated? Points to a (usually r) file
+	  -- How is the corresponding end effect calculated? Points to a function identifier
     calculation VARCHAR(40),
 	  -- Recycle bin
     vis BOOLEAN NOT NULL DEFAULT TRUE  
@@ -72,11 +56,11 @@ CREATE OR REPLACE TABLE effect
 
 /* Relate two effects. E.g. relative humidity makes sense in conjunction with
 air temperature */
-CREATE OR REPLACE TABLE j_effect_effect
+CREATE OR REPLACE TABLE coefficient
 (
-    id_j_effect_effect INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
-    id_effect INTEGER REFERENCES effect (id_effect),
-    id_coefficient INTEGER REFERENCES effect (id_effect),
+    id_coefficient INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
+    id_effect1 INTEGER REFERENCES effect (id_effect),
+    id_effect2 INTEGER REFERENCES effect (id_effect),
     description VARCHAR(250)
 );
 
@@ -100,8 +84,6 @@ CREATE OR REPLACE TABLE value
     -- What parameters are to be provided with values?
     -- From this reference we can derive the lifecycle, action and parameter
     id_effect INTEGER NOT NULL REFERENCES effect (id_effect),
-    -- For measurement effects, define calculation
-    calculation VARCHAR(30) DEFAULT 'getMeanGeneric',
   	-- Recycle bin
     vis BOOLEAN NOT NULL DEFAULT TRUE,
     -- Make sure that a collection can hold each value only one time
