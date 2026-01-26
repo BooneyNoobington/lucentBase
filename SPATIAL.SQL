@@ -1,115 +1,117 @@
-/* Self explainatory. */
+/* Self-explanatory. */
+
 CREATE OR REPLACE TABLE city
 (
-    id_city INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
-    name VARCHAR(60) NOT NULL UNIQUE,
-    -- Recycle bin
-    vis BOOLEAN NOT NULL DEFAULT TRUE
+    id_city     INTEGER         PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(60)     NOT NULL UNIQUE,
+    vis         BOOLEAN         NOT NULL DEFAULT TRUE
 );
+
 
 /* Many cities consist of various districts. */
+
 CREATE OR REPLACE TABLE district
 (
-    id_district INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
-    name VARCHAR(60) NOT NULL UNIQUE,
-    id_city INTEGER NOT NULL REFERENCES city (id_city),
-    -- Why don't use id_district as field for zips? Actually there can be multiple disctricts
-    -- with the same zip in some cities
-    zip INTEGER NOT NULL,
-    -- Recycle bin
-    vis BOOLEAN NOT NULL DEFAULT TRUE
+    id_district     INTEGER         PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    name            VARCHAR(60)     NOT NULL UNIQUE,
+    id_city         INTEGER         NOT NULL,
+    zip             VARCHAR(10)     NOT NULL,
+    vis             BOOLEAN         NOT NULL DEFAULT TRUE,
+
+    FOREIGN KEY (id_city) REFERENCES city (id_city)
 );
 
-/* Seld explainatory. */
+
+/* Self-explanatory. */
+
 CREATE OR REPLACE TABLE street
 (
-    id_street INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    id_district INTEGER NOT NULL REFERENCES district (id_district),
-	  -- Make sure the same street name can only appear once
-	  -- per district
+    id_street       INTEGER         PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    name            VARCHAR(100)    NOT NULL,
+    id_district     INTEGER         NOT NULL,
+    vis             BOOLEAN         NOT NULL DEFAULT TRUE,
+
     CONSTRAINT one_street_per_district UNIQUE(name, id_district),
-	  -- Recycle bin
-    vis BOOLEAN NOT NULL DEFAULT TRUE
+
+    FOREIGN KEY (id_district) REFERENCES district (id_district)
 );
 
 
+/* A house (identified by its number) is situated in a specific street,
+   which in turn is connected to a specific district and so on. */
 
-/* A house (identified by its number) is situated in a specific street which
-in turn is connected to a specific district and so on.*/
 CREATE OR REPLACE TABLE house
 (
-    id_house INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
-    name VARCHAR(50),
-    number INTEGER NOT NULL,
-    number_addition VARCHAR(5),
-    id_street INTEGER NOT NULL REFERENCES street (id_street),
-    -- Make sure that the same house number cannot appear multiple times in the same street
-    CONSTRAINT house_number_addition_street UNIQUE(
-        number
-      , number_addition
-      , id_street
-    ),
-    -- Recycle bin.
-    vis BOOLEAN NOT NULL DEFAULT TRUE
+    id_house            INTEGER         PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    name                VARCHAR(50),
+    number              INTEGER         NOT NULL,
+    number_addition     VARCHAR(5),
+    id_street           INTEGER         NOT NULL,
+    vis                 BOOLEAN         NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT house_number_addition_street UNIQUE(number, number_addition, id_street),
+
+    FOREIGN KEY (id_street) REFERENCES street (id_street)
 );
 
 
+/* Some information is geographical and has coordinates,
+   so a coordinate reference system is needed. */
 
-/* Some information is geographical and has coordinates. So a coordinate reference
-system is needed. */
 CREATE OR REPLACE TABLE crs
 (
-    id_crs INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
-    epsg INTEGER NOT NULL,
-    name VARCHAR(25) UNIQUE NOT NULL,
-    description VARCHAR(150),
-	  -- Recycle bin
-    vis BOOLEAN NOT NULL DEFAULT TRUE
+    id_crs          INTEGER         PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    epsg            INTEGER         NOT NULL,
+    name            VARCHAR(25)     NOT NULL UNIQUE,
+    description     VARCHAR(150),
+    vis             BOOLEAN         NOT NULL DEFAULT TRUE
 );
 
 
+/* This is the general place an investigation takes place.
+   It could be anything from a part of a beach to a crime scene. */
 
-/* This is the general place an investigation takes places. It could be anything
-from a part of a beach to a crime scene. */
 CREATE OR REPLACE TABLE site
 (
-    id_site INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
-    name VARCHAR(20) UNIQUE NOT NULL,
-    -- An address (house number) is one possibility to make clear, where the site is located
-    id_house INTEGER REFERENCES house (id_house),
-    -- A site can also be represented by a polygon
-    borders POLYGON,
-    id_crs INTEGER REFERENCES crs (id_crs),  -- Then a crs is needed for the coordinates
-    -- But just a description is fine too
-    description VARCHAR(50),
-    -- A site needs either an address, a polygon of coordinates surrounding it or just a description
-    CHECK(id_house IS NOT NULL OR borders IS NOT NULL OR description IS NOT NULL),
-    -- TODO: When a polygon of coordinates is given, we also need a coordinate reference system
-    vis BOOLEAN NOT NULL DEFAULT TRUE
+    id_site         INTEGER         PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    name            VARCHAR(20)     NOT NULL UNIQUE,
+    id_house        INTEGER,
+    borders         POLYGON,
+    id_crs          INTEGER,
+    description     VARCHAR(50),
+    vis             BOOLEAN         NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT site_needs_location CHECK(
+        id_house IS NOT NULL OR borders IS NOT NULL OR description IS NOT NULL
+    ),
+
+    FOREIGN KEY (id_house) REFERENCES house (id_house),
+    FOREIGN KEY (id_crs)   REFERENCES crs (id_crs)
 );
 
 
+/* The exact place where an investigation takes place is called a spot.
+   A site can have multiple spots. */
 
-/* The exact place where a investigation takes place is called a spot.
-A site can have multiple spots.*/
 CREATE OR REPLACE TABLE spot
 (
-    id_spot INTEGER PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
-    name VARCHAR(50) UNIQUE NOT NULL,
-    -- A spot can be equipped with coordinates
-    x DOUBLE,
-    y DOUBLE,
-    z DOUBLE,
-    z_class VARCHAR(20),  -- TODO: Implement specific values, CHECK(z IN (''))
-    z_id_unit INTEGER REFERENCES unit (id_unit),
-    id_crs INTEGER REFERENCES crs (id_crs),
-    -- Or just a description like "Hudson River Pier"
+    id_spot     INTEGER         PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(50)     NOT NULL UNIQUE,
+    x           DOUBLE,
+    y           DOUBLE,
+    z           DOUBLE,
+    z_class     VARCHAR(20),
+    z_id_unit   INTEGER,
+    id_crs      INTEGER,
     description VARCHAR(50),
-    -- Link this spot to a specific site
-    id_site INTEGER REFERENCES site (id_site),
-    -- Make sure that at least a description or coordinates are provided.
-    CHECK (description IS NOT NULL OR (x IS NOT NULL AND y IS NOT NULL)),
-    -- Recycle bin,
-    vis BOOLEAN NOT NULL DEFAULT TRUE
+    id_site     INTEGER,
+    vis         BOOLEAN         NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT spot_needs_location CHECK(
+        description IS NOT NULL OR (x IS NOT NULL AND y IS NOT NULL)
+    ),
+
+    FOREIGN KEY (z_id_unit) REFERENCES unit (id_unit),
+    FOREIGN KEY (id_crs)    REFERENCES crs (id_crs),
+    FOREIGN KEY (id_site)   REFERENCES site (id_site)
 );
