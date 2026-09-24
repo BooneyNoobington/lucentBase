@@ -34,6 +34,7 @@ On top of OMS, lucentBase adds what a lab needs to organize its work:
   reported result is corrected later, the report is flagged for amendment.
 - **Orders and customers, method versions, units with conversions.**
 
+What it looks like: [docs/schema.md](docs/schema.md) (diagrams).
 Why it is built this way: [docs/design.md](docs/design.md).
 
 
@@ -95,7 +96,7 @@ migrations/   the schema, as numbered migration files
 bin/          migrate and test
 tests/        SQL tests
 seed/         fictional demo data
-docs/         OMS alignment and design notes
+docs/         OMS alignment, schema diagrams, design notes
 ```
 
 
