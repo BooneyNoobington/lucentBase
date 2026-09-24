@@ -1,0 +1,34 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        mariadb: ["11.8", "12.3", "13.0"]
+
+    services:
+      mariadb:
+        image: mariadb:${{ matrix.mariadb }}
+        env:
+          MARIADB_ROOT_PASSWORD: test
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The client inside the service container matches the server version.
+      - name: Run the SQL tests
+        env:
+          MARIADB_CLIENT: docker exec -i ${{ job.services.mariadb.id }} mariadb -uroot -ptest
+        run: bin/test

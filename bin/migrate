@@ -1,0 +1,80 @@
+#!/bin/sh
+# Bring a lucentBase database up to the newest schema version.
+#
+# Usage:   bin/migrate <database>
+#
+# Every file in migrations/ is applied once, in file name order, and recorded
+# in the table schema_migration together with its SHA-256 checksum. Files that
+# are already recorded are skipped; if such a file was edited afterwards, the
+# script stops, because the database no longer matches what the file says.
+#
+# The database is created if it does not exist yet.
+#
+# Connection: the command in $MARIADB_CLIENT is used to talk to the server
+# (default: "mariadb"). Put host, user and password into an option file, e.g.
+#   MARIADB_CLIENT="mariadb --defaults-extra-file=$HOME/.config/lucentLIMS/dev.cnf"
+
+set -eu
+
+if [ $# -ne 1 ]; then
+    echo "usage: $0 <database>" >&2
+    exit 2
+fi
+
+database=$1
+client=${MARIADB_CLIENT:-mariadb}
+migration_dir=$(cd "$(dirname "$0")/../migrations" && pwd)
+
+case $database in
+    *[!A-Za-z0-9_]*) echo "database name may only contain letters, digits and _" >&2; exit 2 ;;
+esac
+
+if command -v sha256sum >/dev/null 2>&1; then
+    checksum() { sha256sum "$1" | cut -d ' ' -f 1; }
+else
+    checksum() { shasum -a 256 "$1" | cut -d ' ' -f 1; }
+fi
+
+# Run SQL given on stdin against the database, without column headers.
+sql() { $client --batch --skip-column-names "$database"; }
+
+$client --batch -e "CREATE DATABASE IF NOT EXISTS \`$database\`
+                        CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_as_ci"
+
+sql <<'SQL'
+CREATE TABLE IF NOT EXISTS schema_migration
+(
+    id_schema_migration     INTEGER         PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    version                 VARCHAR(10)     NOT NULL UNIQUE,
+    file_name               VARCHAR(200)    NOT NULL,
+    sha256                  CHAR(64)        NOT NULL,
+    applied_at              TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    applied_by              VARCHAR(200)    NOT NULL DEFAULT (USER())
+);
+SQL
+
+applied=0
+for file in "$migration_dir"/[0-9][0-9][0-9][0-9]_*.sql; do
+    name=$(basename "$file")
+    version=${name%%_*}
+    sum=$(checksum "$file")
+
+    recorded=$(echo "SELECT sha256 FROM schema_migration WHERE version = '$version'" | sql)
+
+    if [ -n "$recorded" ]; then
+        if [ "$recorded" != "$sum" ]; then
+            echo "$name was changed after it had been applied to $database." >&2
+            echo "Never edit an applied migration; add a new one instead." >&2
+            exit 1
+        fi
+        continue
+    fi
+
+    echo "applying $name"
+    sql < "$file"
+    echo "INSERT INTO schema_migration (version, file_name, sha256)
+          VALUES ('$version', '$name', '$sum')" | sql
+    applied=$((applied + 1))
+done
+
+echo "$database is up to date ($applied migration(s) applied)"

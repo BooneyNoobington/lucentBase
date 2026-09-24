@@ -1,0 +1,59 @@
+#!/bin/sh
+# Run the SQL tests.
+#
+# Usage:   bin/test                       run every tests/test_*.sql
+#          bin/test tests/test_samples.sql run only the given files
+#
+# Each test file gets its own fresh database lucent_test_<name>, built with
+# bin/migrate, plus the assertion procedures from tests/lib/assert.sql. A test
+# whose first line is "-- uses: seed" also gets the demo data from seed/.
+#
+# A test passes when it runs without any SQL error. Assertions raise an error
+# when they fail. The database of a failed test is kept for inspection; the
+# database of a passed test is dropped.
+#
+# Connection: see bin/migrate ($MARIADB_CLIENT).
+
+set -u
+
+client=${MARIADB_CLIENT:-mariadb}
+root=$(cd "$(dirname "$0")/.." && pwd)
+
+if [ $# -eq 0 ]; then
+    set -- "$root"/tests/test_*.sql
+fi
+
+passed=0
+failed=0
+
+for test in "$@"; do
+    name=$(basename "$test" .sql)
+    database=lucent_test_${name#test_}
+
+    $client --batch -e "DROP DATABASE IF EXISTS \`$database\`"
+
+    output=$(
+        {
+            "$root/bin/migrate" "$database" >/dev/null &&
+            $client --batch "$database" < "$root/tests/lib/assert.sql" &&
+            if head -n 1 "$test" | grep -q 'uses: seed'; then
+                $client --batch "$database" < "$root/seed/demo_environmental_lab.sql"
+            fi &&
+            $client --batch "$database" < "$test"
+        } 2>&1
+    )
+
+    if [ $? -eq 0 ]; then
+        $client --batch -e "DROP DATABASE \`$database\`"
+        echo "ok      $name"
+        passed=$((passed + 1))
+    else
+        echo "FAILED  $name   (database $database kept)"
+        echo "$output" | sed 's/^/        /'
+        failed=$((failed + 1))
+    fi
+done
+
+echo
+echo "$passed passed, $failed failed"
+[ "$failed" -eq 0 ]

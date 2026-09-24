@@ -1,47 +1,104 @@
 # lucentBase
 
-The MariaDB database that underlies lucentLIMS.
+The MariaDB database behind **lucentLIMS**, an open source laboratory
+information management system for small environmental and academic labs, run
+by people who like to tinker.
+
+lucentBase is a complete LIMS back end on its own. All rules live in the
+database, so you can work with it from a frontend, from a SQL client, or from
+a spreadsheet, and the same rules hold everywhere.
 
 
-## Prerequisites
+## Built on ISO 19156 (Observations, Measurements and Samples)
 
-- A Linux system (other systems like macOS and Windows probably also work but aren't tested)
-- MariaDB 10.11 or higher (older versions might still work but aren't tested)
+The data model follows **ISO 19156:2023 / OGC Topic 20**, the international
+standard for observations and samples. Samples, observations, observed
+properties, procedures and features mean exactly what they mean there. Every
+structural deviation has a documented reason:
+**[docs/oms-alignment.md](docs/oms-alignment.md)**.
 
+On top of OMS, lucentBase adds what a lab needs to organize its work:
 
-## Installation
+- **A lifecycle for every sample.** Everything that happens to a sample
+  (sampling, receipt, filtration, measurement, disposal) is an *action*.
+  Methods declare which others must be finished first, and which others they
+  bring along when they are planned. The database refuses to start an action
+  too early, and it refuses to plan anything for a sample after it has been
+  disposed of.
+- **Results that stay honest.** Results are never overwritten; corrections
+  are recorded with a reason. Values below the limit of quantification are
+  kept exactly and shown as "< LOQ". Calculated results (dilutions, sums,
+  water hardness) record their inputs, and are flagged as soon as an input
+  changes.
+- **Reports that stay what they were.** Issued reports are frozen. When a
+  reported result is corrected later, the report is flagged for amendment.
+- **Orders and customers, method versions, units with conversions.**
 
-1. Clone this project:
-   ```bash
-   git clone https://github.com/BooneyNoobington/lucentBase.git
-   ```
-
-2. Execute this command as root user inside the project directory (using `sudo` in the example):
-   ```bash
-   sed "s/{linux_user}/$USER/g" DATABASE_GENERATION.SQL | sudo mysql
-   ```
-
-
-## Philosophy and ERD
-
-lucentBase aims to strictly adhere to the first three normal forms in order to maximize maintainability and enable frontend building with many different frameworks.
-
-It is also process-oriented. In a lab workflow, any object of observation—mostly samples—goes through a number of steps during its lifetime, such as sampling, registration in the lab, preprocessing, various measurements, and disposal. These steps are called **actions**. Each action can have **effects** (instances of predefined **parameters**), such as the recording of the time of sampling and the arrival time in the lab, confirmation that preprocessing is completed, measurement results, or even their total costs.
-
-**Collections** make up the second center of lucentBase. Besides samples, a collection can be a singular measurement or a time series, with the unifying quality of holding an assortment of **values**—which are **effects** assigned to a specific collection.
-
-A value consists of one or more **raw values** (connected to a value via its primary key `id_value`).
-
-Unlike many other LIMSs, lucentBase has no table for end results. Instead, **effects** know functions to calculate an end result from their **values** and **raw values**. They are also self-joined by **coefficients** to get **raw values** of a different **value**.
+Why it is built this way: [docs/design.md](docs/design.md).
 
 
-## Logging and Comment Tables
+## Getting started
 
-By default, every change on a table is logged in its corresponding logging table. Without user changes, logging table names are the table name prefixed by `l_`. They are automatically generated when setting up the database via the procedure `create_all_log_tables()`.
+You need MariaDB 11.8 or newer and its `mariadb` command line client.
 
-Not auto-generated are "comment tables." These are tables that hold textual comments for a specific record and are prefixed by `c_`.
+```sh
+git clone https://github.com/BooneyNoobington/lucentBase.git
+cd lucentBase
+bin/migrate lucent
+```
+
+`bin/migrate` creates the database if needed and applies every migration not
+yet applied. Run it again after pulling updates. It talks to the server
+through the command in `$MARIADB_CLIENT` (default: `mariadb`), so connection
+details go into a MariaDB option file:
+
+```sh
+export MARIADB_CLIENT="mariadb --defaults-extra-file=$HOME/.config/lucentLIMS/dev.cnf"
+```
+
+To look around in a database full of example data:
+
+```sh
+bin/migrate lucent_demo
+$MARIADB_CLIENT lucent_demo < seed/demo_environmental_lab.sql
+```
+
+Then start with these views:
+
+```sql
+SELECT * FROM v_worklist;          -- what there is to do, and what it waits for
+SELECT * FROM v_sample_overview;   -- every sample, where it came from, what is open
+SELECT * FROM v_observation;       -- every result, as reported and as measured
+SELECT * FROM v_stale_calculation; -- calculated results whose inputs changed
+```
+
+The seed file itself is a readable walkthrough of a lab's two weeks of work.
 
 
-## Further Naming Conventions
+## Tests
 
-Junction tables have meaningful names wherever possible. If they don't carry intuitive information, they are prefixed by `j_`.
+```sh
+bin/test                            # all tests
+bin/test tests/test_lifecycle.sql   # one file
+```
+
+Each test file runs in a fresh database (`lucent_test_<name>`, so the account
+needs rights on databases matching `lucent%`). Tests are plain SQL with a few
+assertion procedures; see [tests/lib/assert.sql](tests/lib/assert.sql).
+GitHub Actions runs them against MariaDB 11.8, 12.3 and 13.0.
+
+
+## Layout
+
+```
+migrations/   the schema, as numbered migration files
+bin/          migrate and test
+tests/        SQL tests
+seed/         fictional demo data
+docs/         OMS alignment and design notes
+```
+
+
+## License
+
+GNU Affero General Public License v3.0, see [LICENSE](LICENSE).
