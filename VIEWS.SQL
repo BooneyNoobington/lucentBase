@@ -1,14 +1,15 @@
 /* Generic views */
 
 
-/* Display raw values in conjunction with their respective collections. */
+/* Display raw values in conjunction with their respective collections.
+   Raw values without a person or unit are kept; their unit falls back to the parameter's. */
 
 CREATE OR REPLACE VIEW v_raw_value AS
 SELECT      c.name              AS "collection",
             c.id_collection     AS "collection_id",
             a.name              AS "action",
             a.iteration         AS "version",
-            v.name              AS "parameter",
+            pm.name             AS "parameter",
             p.given_name        AS "operator_given_name",
             p.surname           AS "operator_surname",
             y.decimal_raw_value AS "y",
@@ -20,8 +21,8 @@ JOIN        effect e        ON e.id_effect = v.id_effect
 JOIN        action a        ON a.id_action = e.id_action
 JOIN        parameter pm    ON pm.id_parameter = e.id_parameter
 JOIN        raw_value y     ON y.id_value = v.id_value
-JOIN        person p        ON p.id_person = y.id_person
-JOIN        unit u          ON u.id_unit = y.id_unit
+LEFT JOIN   person p        ON p.id_person = y.id_person
+LEFT JOIN   unit u          ON u.id_unit = COALESCE(y.id_unit, pm.id_unit)
 ;
 
 
