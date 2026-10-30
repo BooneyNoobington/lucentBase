@@ -12,7 +12,10 @@
 
 /* Instances of parameter will fill up the activity data. It can be many things
    and is always a property of an action—like a measurement result but also metadata
-   such as "was sample X filtrated?" */
+   such as "was sample X filtrated?"
+
+   The value class says which kind of raw value a parameter takes: decimal_raw_value,
+   text_raw_value, boolean_raw_value or datetime_raw_value. */
 
 CREATE OR REPLACE TABLE parameter
 (
@@ -20,7 +23,12 @@ CREATE OR REPLACE TABLE parameter
     name            VARCHAR(30)     NOT NULL UNIQUE,
     description     VARCHAR(80),
     id_unit         INTEGER,
+    value_class     VARCHAR(8)      NOT NULL DEFAULT 'decimal',
     vis             BOOLEAN         NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT value_class_choices CHECK(
+        value_class IN ('decimal', 'text', 'boolean', 'datetime')
+    ),
 
     FOREIGN KEY (id_unit) REFERENCES unit (id_unit)
 );
