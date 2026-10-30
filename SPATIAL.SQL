@@ -13,10 +13,12 @@ CREATE OR REPLACE TABLE city
 CREATE OR REPLACE TABLE district
 (
     id_district     INTEGER         PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    name            VARCHAR(60)     NOT NULL UNIQUE,
+    name            VARCHAR(60)     NOT NULL,
     id_city         INTEGER         NOT NULL,
     zip             VARCHAR(10)     NOT NULL,
     vis             BOOLEAN         NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT one_district_per_city UNIQUE(name, id_city),
 
     FOREIGN KEY (id_city) REFERENCES city (id_city)
 );
