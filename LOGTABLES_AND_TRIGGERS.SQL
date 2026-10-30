@@ -39,10 +39,12 @@ BEGIN
         -- Define the log table name
         SET log_table = CONCAT('l_', tbl_name);
 
-        -- Generate the column list for checksum using GROUP_CONCAT
+        -- Generate the column list for checksum using GROUP_CONCAT.
+        -- CONCAT_WS below puts a single '|' between the columns.
         SELECT GROUP_CONCAT(
             CONCAT('COALESCE(NEW.', COLUMN_NAME, ', \'NULL\')')
-            SEPARATOR ', \'|\', '
+            ORDER BY ordinal_position
+            SEPARATOR ', '
         )
         INTO column_list
         FROM information_schema.columns
@@ -104,7 +106,7 @@ BEGIN
                     NEW.id_', tbl_name, ',
                     \'I\',
                     @current_user_id,
-                    \'Inserted\',
+                    COALESCE(@change_note, \'Inserted\'),
                     ', checksum_expr, '
                 );
             END;
@@ -129,7 +131,7 @@ BEGIN
                     NEW.id_', tbl_name, ',
                     \'U\',
                     @current_user_id,
-                    \'Updated\',
+                    COALESCE(@change_note, \'Updated\'),
                     ', checksum_expr, '
                 );
             END;

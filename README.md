@@ -39,6 +39,16 @@ Unlike many other LIMSs, lucentBase has no table for end results. Instead, **eff
 
 By default, every change on a table is logged in its corresponding logging table. Without user changes, logging table names are the table name prefixed by `l_`. They are automatically generated when setting up the database via the procedure `create_all_log_tables()`.
 
+The logging triggers take two session variables from the application that writes:
+
+- `@current_user_id`: the `id_person` of whoever makes the change, stored as `id_editor`;
+- `@change_note`: optionally, why the change was made, stored as `note` (otherwise "Inserted" or "Updated").
+
+```sql
+SET @current_user_id = 1, @change_note = 'Confirmed after re-measurement';
+UPDATE raw_value SET accepted = TRUE WHERE id_raw_value = 42;
+```
+
 Not auto-generated are "comment tables." These are tables that hold textual comments for a specific record and are prefixed by `c_`.
 
 
