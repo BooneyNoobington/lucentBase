@@ -11,7 +11,10 @@ CREATE OR REPLACE TABLE organization
 );
 
 
-/* Information about a particular person such as an employee or contractor. */
+/* Information about a particular person such as an employee or contractor.
+   linux_user is the account a person signs in with. Someone who has left is no longer
+   active: they can't sign in, but stay in the history. vis = FALSE would hide them as if
+   they had never been entered. */
 
 CREATE OR REPLACE TABLE person
 (
@@ -20,9 +23,41 @@ CREATE OR REPLACE TABLE person
     given_name          VARCHAR(50)     NOT NULL,
     surname             VARCHAR(50)     NOT NULL,
     linux_user          VARCHAR(50)     UNIQUE,
+    active              BOOLEAN         NOT NULL DEFAULT TRUE,
     vis                 BOOLEAN         NOT NULL DEFAULT TRUE,
 
     FOREIGN KEY (id_organization) REFERENCES organization (id_organization)
+);
+
+
+/* What people may do, such as registering collections or accepting raw values. Front ends
+   and APIs check roles; signing in (passwords, two factors) stays with whatever checks
+   linux_user. Not to be confused with the role of a person in an action (j_action_person),
+   which says who is responsible, not who is allowed. */
+
+CREATE OR REPLACE TABLE role
+(
+    id_role             INTEGER         PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    name                VARCHAR(20)     NOT NULL UNIQUE,
+    description         VARCHAR(250),
+    vis                 BOOLEAN         NOT NULL DEFAULT TRUE
+);
+
+
+/* Grant roles to people. Revoking a role sets vis to FALSE and granting it again back to
+   TRUE, so l_j_person_role shows who granted and revoked what, and when. */
+
+CREATE OR REPLACE TABLE j_person_role
+(
+    id_j_person_role    INTEGER         PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    id_person           INTEGER         NOT NULL,
+    id_role             INTEGER         NOT NULL,
+    vis                 BOOLEAN         NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT id_person_id_role_unique UNIQUE(id_person, id_role),
+
+    FOREIGN KEY (id_person) REFERENCES person (id_person),
+    FOREIGN KEY (id_role)   REFERENCES role (id_role)
 );
 
 
