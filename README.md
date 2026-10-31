@@ -54,6 +54,11 @@ UPDATE raw_value SET accepted = TRUE WHERE id_raw_value = 42;
 Not auto-generated are "comment tables." These are tables that hold textual comments for a specific record and are prefixed by `c_`.
 
 
+## People and Roles
+
+A person signs in with `person.linux_user`; checking the password is left to the system the account belongs to (the Linux system, an LDAP directory or an identity provider). What a person may do is stored here: `role` names the permissions (`sampler`, `analyst`, `reviewer`, `admin`), `j_person_role` grants them. Revoking a role sets `vis` to `FALSE`, so the log keeps who granted and revoked what. People who have left are set to `active = FALSE` rather than hidden, so their names stay in the history.
+
+
 ## Further Naming Conventions
 
 Junction tables have meaningful names wherever possible. If they don't carry intuitive information, they are prefixed by `j_`.
