@@ -12,7 +12,10 @@
 
 /* Instances of parameter will fill up the activity data. It can be many things
    and is always a property of an action—like a measurement result but also metadata
-   such as "was sample X filtrated?" */
+   such as "was sample X filtrated?"
+
+   The value class says which kind of raw value a parameter takes: decimal_raw_value,
+   text_raw_value, boolean_raw_value or datetime_raw_value. */
 
 CREATE OR REPLACE TABLE parameter
 (
@@ -20,7 +23,12 @@ CREATE OR REPLACE TABLE parameter
     name            VARCHAR(30)     NOT NULL UNIQUE,
     description     VARCHAR(80),
     id_unit         INTEGER,
+    value_class     VARCHAR(8)      NOT NULL DEFAULT 'decimal',
     vis             BOOLEAN         NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT value_class_choices CHECK(
+        value_class IN ('decimal', 'text', 'boolean', 'datetime')
+    ),
 
     FOREIGN KEY (id_unit) REFERENCES unit (id_unit)
 );
@@ -60,6 +68,40 @@ CREATE OR REPLACE TABLE coefficient
 
     FOREIGN KEY (id_effect1) REFERENCES effect (id_effect),
     FOREIGN KEY (id_effect2) REFERENCES effect (id_effect)
+);
+
+
+/* Limits a parameter's raw values must keep in a given context, such as the highest
+   concentration a regulation allows. They aren't method specific (unlike the uncertainty
+   in effect), so they belong to the parameter, not to the effect.
+
+   The context is a document (link), e.g. an SOP or the regulation it implements, so the
+   same parameter can have different limits for ground water and surface water. An action
+   knows its documents (j_action_link): the limits for a raw value are those of its
+   parameter in the documents of its action.
+
+   Limits are in the parameter's unit. Booleans count as 0 (false) and 1 (true). */
+
+CREATE OR REPLACE TABLE threshold
+(
+    id_threshold    INTEGER         PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    id_parameter    INTEGER         NOT NULL,
+    id_link         INTEGER         NOT NULL,
+    lower_limit     DOUBLE,
+    upper_limit     DOUBLE,
+    description     VARCHAR(100),
+    vis             BOOLEAN         NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT threshold_has_a_limit CHECK(
+        lower_limit IS NOT NULL OR upper_limit IS NOT NULL
+    ),
+    CONSTRAINT lower_limit_below_upper_limit CHECK(
+        lower_limit IS NULL OR upper_limit IS NULL OR lower_limit <= upper_limit
+    ),
+    CONSTRAINT id_parameter_id_link_unique UNIQUE(id_parameter, id_link),
+
+    FOREIGN KEY (id_parameter)  REFERENCES parameter (id_parameter),
+    FOREIGN KEY (id_link)       REFERENCES link (id_link)
 );
 
 

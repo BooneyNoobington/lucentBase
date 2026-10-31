@@ -1,4 +1,5 @@
-/* A basic method to assign a task / to-do regarding an arbitrary record. */
+/* A basic method to assign a task / to-do regarding an arbitrary record.
+   When it was done and by whom is in its log table. */
 
 CREATE OR REPLACE TABLE task
 (
@@ -8,6 +9,7 @@ CREATE OR REPLACE TABLE task
     id_assigner     INTEGER         NOT NULL,
     id_assignee     INTEGER         NOT NULL,
     deadline        DATETIME,
+    done            BOOLEAN         NOT NULL DEFAULT FALSE,
     vis             BOOLEAN         NOT NULL DEFAULT TRUE,
 
     FOREIGN KEY (id_assigner) REFERENCES person (id_person),
